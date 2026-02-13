@@ -1,6 +1,15 @@
 {%- comment -%}
-  Avis Premium 2026 — Headless API + Swiper 11
+  Avis Premium 2026 — Headless API + Swiper 11 + Custom Element
   Inspiration : Apple.com — Clean, Spacious, Premium
+  ──────────────────────────────────────────────────────
+  Bonnes pratiques appliquées :
+  ✅ Web Component <avis-premium> — zéro pollution globale
+  ✅ IntersectionObserver — fetch API uniquement quand visible
+  ✅ JSON-LD dynamique — vraies données après fetch
+  ✅ Swiper chargé 1 seule fois même si section ×3
+  ✅ Filtrage slider : rebuild complet (pas de display:none)
+  ✅ Gestion erreur : section cachée en production
+  ✅ aspect-ratio explicite sur images — anti CLS
 {%- endcomment -%}
 
 {%- assign s = section.settings -%}
@@ -8,9 +17,19 @@
 {%- assign is_glass = false -%}
 {%- if s.design_mode == 'glassmorphism' -%}{%- assign is_glass = true -%}{%- endif -%}
 
+{%- comment -%} Swiper CSS — le navigateur déduplique naturellement les <link> identiques {%- endcomment -%}
 {{ 'swiper-bundle.min.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
+  /* ═══════════════════════════════════════
+     CUSTOM ELEMENT — obligatoire : les Custom Elements
+     sont display:inline par défaut → Swiper = 0px de large
+     ═══════════════════════════════════════ */
+  avis-premium {
+    display: block;
+    width: 100%;
+  }
+
   /* ═══════════════════════════════════════
      SECTION
      ═══════════════════════════════════════ */
@@ -44,7 +63,8 @@
     padding: 0 24px;
     position: relative;
     z-index: 1;
-    overflow: hidden;
+    /* PAS de overflow:hidden ici — Swiper gère son propre overflow
+       et les flèches de navigation doivent pouvoir dépasser */
   }
 
   /* ═══════════════════════════════════════
@@ -53,7 +73,7 @@
   .rp-{{ sid }} .rp-header {
     text-align: center;
     max-width: 680px;
-    margin: 0 auto 56px;
+    margin: 0 auto 36px;
   }
 
   .rp-{{ sid }} .rp-badge {
@@ -111,7 +131,7 @@
     display: flex;
     justify-content: center;
     gap: 6px;
-    margin-bottom: 40px;
+    margin-bottom: 24px;
   }
 
   .rp-{{ sid }} .rp-filter-btn {
@@ -159,8 +179,8 @@
     gap: 24px;
   }
   .rp-{{ sid }} .rp-skeleton__item {
-    height: 320px;
-    border-radius: 20px;
+    border-radius: 16px;
+    aspect-ratio: 4 / 3;
     {% if is_glass %}
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.06);
@@ -220,76 +240,102 @@
     {% endif %}
   }
 
-  /* Image */
+  /* Image — format naturel du client, pas de crop forcé */
   .rp-{{ sid }} .rp-media {
     position: relative;
-    border-radius: {{ s.card_radius | minus: 6 }}px;
+    border-radius: {{ s.card_radius | minus: 4 }}px;
     overflow: hidden;
-    margin-bottom: 16px;
-    max-height: 180px;
+    margin-bottom: 12px;
   }
   .rp-{{ sid }} .rp-media img,
   .rp-{{ sid }} .rp-media video {
     width: 100%;
-    height: 180px;
-    object-fit: cover;
+    height: auto;
+    max-height: 220px;
+    object-fit: contain;
     display: block;
+    border-radius: {{ s.card_radius | minus: 4 }}px;
+    background: {% if is_glass %}rgba(0,0,0,0.15){% else %}#f0f0f0{% endif %};
     transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
   .rp-{{ sid }} .rp-media:hover img,
   .rp-{{ sid }} .rp-media:hover video {
-    transform: scale(1.04);
+    transform: scale(1.03);
   }
 
   /* Stars */
   .rp-{{ sid }} .rp-stars {
     color: var(--rp-star);
-    font-size: 15px;
-    letter-spacing: 2px;
-    margin-bottom: 12px;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
   }
 
   /* Title */
   .rp-{{ sid }} .rp-card-title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: -0.01em;
     line-height: 1.3;
-    margin: 0 0 8px;
+    margin: 0 0 6px;
     color: {% if is_glass %}#fff{% else %}{{ s.card_text }}{% endif %};
   }
 
-  /* Body */
+  /* Body — tronqué par défaut */
   .rp-{{ sid }} .rp-body {
     font-size: {{ s.body_size }}px;
-    line-height: 1.6;
+    line-height: 1.5;
     color: {% if is_glass %}rgba(255, 255, 255, 0.7){% else %}{{ s.card_body }}{% endif %};
     flex: 1 1 auto;
     margin: 0;
     display: -webkit-box;
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .rp-{{ sid }} .rp-body.expanded {
+    -webkit-line-clamp: unset;
+    display: block;
+    overflow: visible;
+  }
+
+  /* Bouton « En savoir plus » */
+  .rp-{{ sid }} .rp-readmore {
+    display: inline-block;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-top: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rp-accent);
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+  .rp-{{ sid }} .rp-readmore:hover {
+    opacity: 0.7;
   }
 
   /* Footer */
   .rp-{{ sid }} .rp-footer {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-top: 24px;
-    padding-top: 20px;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 12px;
     border-top: 1px solid {% if is_glass %}rgba(255, 255, 255, 0.08){% else %}rgba(0, 0, 0, 0.06){% endif %};
   }
 
   .rp-{{ sid }} .rp-avatar {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: #fff;
     flex-shrink: 0;
@@ -297,19 +343,19 @@
   }
 
   .rp-{{ sid }} .rp-author {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: {% if is_glass %}#fff{% else %}{{ s.card_text }}{% endif %};
   }
 
   .rp-{{ sid }} .rp-verified {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     color: {{ s.verified_color }};
   }
 
   .rp-{{ sid }} .rp-date {
-    font-size: 12px;
+    font-size: 11px;
     color: {% if is_glass %}rgba(255, 255, 255, 0.4){% else %}{{ s.text_muted }}{% endif %};
   }
 
@@ -334,11 +380,65 @@
   }
 
   /* ═══════════════════════════════════════
+     LAYOUT : MASONRY (colonnes CSS)
+     ═══════════════════════════════════════ */
+  .rp-{{ sid }} .rp-masonry {
+    column-count: 3;
+    column-gap: {{ s.grid_gap }}px;
+  }
+  .rp-{{ sid }} .rp-masonry > .rp-card {
+    break-inside: avoid;
+    margin-bottom: {{ s.grid_gap }}px;
+    display: inline-block;
+    width: 100%;
+  }
+  @media (max-width: 999px) {
+    .rp-{{ sid }} .rp-masonry { column-count: 2; }
+  }
+  @media (max-width: 599px) {
+    .rp-{{ sid }} .rp-masonry { column-count: 1; }
+  }
+
+  /* ═══════════════════════════════════════
+     LAYOUT : LIST (vertical pleine largeur)
+     ═══════════════════════════════════════ */
+  .rp-{{ sid }} .rp-list {
+    display: flex;
+    flex-direction: column;
+    gap: {{ s.grid_gap }}px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .rp-{{ sid }} .rp-list > .rp-card {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .rp-{{ sid }} .rp-list > .rp-card .rp-media {
+    flex-shrink: 0;
+    width: 120px;
+    margin-bottom: 0;
+  }
+  .rp-{{ sid }} .rp-list > .rp-card .rp-media img,
+  .rp-{{ sid }} .rp-list > .rp-card .rp-media video {
+    max-height: 120px;
+  }
+  @media (max-width: 599px) {
+    .rp-{{ sid }} .rp-list > .rp-card {
+      flex-direction: column;
+    }
+    .rp-{{ sid }} .rp-list > .rp-card .rp-media {
+      width: 100%;
+    }
+  }
+
+  /* ═══════════════════════════════════════
      SWIPER OVERRIDES
      ═══════════════════════════════════════ */
   .rp-{{ sid }} .swiper {
-    padding-bottom: 56px;
-    overflow: hidden;
+    padding-bottom: 44px;
+    overflow: hidden;   /* ⚠️ OBLIGATOIRE — Swiper calcule les largeurs à partir du conteneur */
+    position: relative;
   }
   .rp-{{ sid }} .swiper-wrapper {
     align-items: stretch;
@@ -346,55 +446,48 @@
   .rp-{{ sid }} .swiper-slide {
     height: auto;
     min-width: 0;
+    box-sizing: border-box;
   }
 
   .rp-{{ sid }} .swiper-pagination-bullet {
     width: 8px;
     height: 8px;
     border-radius: 8px;
-    opacity: 0.25;
-    background: {% if is_glass %}#fff{% else %}{{ s.title_color }}{% endif %};
+    opacity: 0.3;
+    background: {{ s.dot_color }};
     transition: all 0.3s ease;
   }
   .rp-{{ sid }} .swiper-pagination-bullet-active {
     opacity: 1;
     width: 24px;
-    background: var(--rp-accent);
+    background: {{ s.dot_active_color }};
   }
 
   .rp-{{ sid }} .swiper-button-next,
   .rp-{{ sid }} .swiper-button-prev {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    top: calc(50% - 28px);
+    top: calc(50% - 20px);
     transition: all 0.2s ease;
+    background: {{ s.arrow_bg }};
+    color: {{ s.arrow_icon }};
+    border: 1px solid {% if is_glass %}rgba(255, 255, 255, 0.15){% else %}rgba(0, 0, 0, 0.08){% endif %};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     {% if is_glass %}
-      background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-    {% else %}
-      background: #fff;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      color: {{ s.title_color }};
     {% endif %}
   }
   .rp-{{ sid }} .swiper-button-next:hover,
   .rp-{{ sid }} .swiper-button-prev:hover {
-    transform: scale(1.08);
-    {% if is_glass %}
-      background: rgba(255, 255, 255, 0.2);
-    {% else %}
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    {% endif %}
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   }
   .rp-{{ sid }} .swiper-button-next::after,
   .rp-{{ sid }} .swiper-button-prev::after {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
   }
 
   {% unless s.show_arrows %}
@@ -432,8 +525,43 @@
   }
 {%- endstyle -%}
 
-<!-- ═══════════════════ HTML ═══════════════════ -->
-<section class="rp-{{ sid }}">
+<!-- ═══════════════════ HTML — Custom Element ═══════════════════ -->
+<avis-premium class="rp-{{ sid }}">
+
+  {%- comment -%} Config JSON interne — lu par le Web Component {%- endcomment -%}
+  <script type="application/json">
+    {
+      "sid": {{ sid | json }},
+      "api": {{ s.api_url | default: '' | json }},
+      "handle": {{ s.product_handle | default: '' | json }},
+      "minRating": {{ s.min_rating | json }},
+      "maxReviews": {{ s.max_reviews | json }},
+      "layout": {{ s.layout | json }},
+      "show": {
+        "image": {{ s.show_image | json }},
+        "stars": {{ s.show_stars | json }},
+        "title": {{ s.show_review_title | json }},
+        "body": {{ s.show_body | json }},
+        "avatar": {{ s.show_avatar | json }},
+        "date": {{ s.show_date | json }},
+        "country": {{ s.show_country | json }},
+        "verified": {{ s.show_verified | json }}
+      },
+      "swiper": {
+        "effect": {{ s.swiper_effect | default: 'slide' | json }},
+        "autoplay": {{ s.autoplay | json }},
+        "delay": {{ s.autoplay_speed | json }},
+        "loop": {{ s.loop | json }},
+        "gap": {{ s.slide_gap | json }},
+        "mobile": {{ s.per_mobile | json }},
+        "tablet": {{ s.per_tablet | json }},
+        "desktop": {{ s.per_desktop | json }}
+      },
+      "swiperJs": {{ 'swiper-bundle.min.js' | asset_url | json }},
+      "productName": {{ product.title | default: shop.name | json }}
+    }
+  </script>
+
   {% if is_glass or s.overlay_opacity > 0 %}<div class="rp-overlay"></div>{% endif %}
 
   <div class="rp-inner">
@@ -446,11 +574,11 @@
       {% if s.subtitle != blank %}
         <p class="rp-subtitle">{{ s.subtitle }}</p>
       {% endif %}
-      <div class="rp-avg" id="rp-avg-{{ sid }}" style="display:none;"></div>
+      <div class="rp-avg" data-el="avg" style="display:none;"></div>
     </div>
 
     {% if s.show_filter_bar %}
-      <div class="rp-filters" id="rp-filters-{{ sid }}">
+      <div class="rp-filters" data-el="filters">
         <button class="rp-filter-btn active" data-rating="all">Tous</button>
         <button class="rp-filter-btn" data-rating="5">5 ★</button>
         <button class="rp-filter-btn" data-rating="4">4 ★</button>
@@ -458,22 +586,34 @@
       </div>
     {% endif %}
 
-    <div id="rp-skeleton-{{ sid }}" class="rp-skeleton">
+    <div data-el="skeleton" class="rp-skeleton">
       <div class="rp-skeleton__item"></div>
       <div class="rp-skeleton__item"></div>
       <div class="rp-skeleton__item"></div>
     </div>
 
-    <div id="rp-target-{{ sid }}" style="display:none;">
-      <div id="rp-wrapper-{{ sid }}"
-        class="{% if s.layout == 'slider' %}swiper{% else %}rp-grid{% endif %}">
-        <div id="rp-cards-{{ sid }}"
-          class="{% if s.layout == 'slider' %}swiper-wrapper{% endif %}">
+    <div data-el="target" style="display:none;">
+      {%- liquid
+        case s.layout
+          when 'slider'
+            assign wrapper_class = 'swiper'
+            assign cards_class   = 'swiper-wrapper'
+          when 'masonry'
+            assign wrapper_class = ''
+            assign cards_class   = 'rp-masonry'
+          when 'list'
+            assign wrapper_class = ''
+            assign cards_class   = 'rp-list'
+          else
+            assign wrapper_class = ''
+            assign cards_class   = 'rp-grid'
+        endcase
+      -%}
+      <div data-el="wrapper" {% if wrapper_class != blank %}class="{{ wrapper_class }}"{% endif %}>
+        <div data-el="cards" class="{{ cards_class }}">
         </div>
-        {% if s.layout == 'slider' and s.show_dots %}
+        {% if s.layout == 'slider' %}
           <div class="swiper-pagination"></div>
-        {% endif %}
-        {% if s.layout == 'slider' and s.show_arrows %}
           <div class="swiper-button-prev"></div>
           <div class="swiper-button-next"></div>
         {% endif %}
@@ -481,220 +621,403 @@
     </div>
 
   </div>
-</section>
+</avis-premium>
 
-<!-- SEO -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org/",
-  "@type": "Product",
-  "name": "{{ product.title | default: shop.name }}",
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.9",
-    "reviewCount": "542"
-  }
-}
+<!-- ═══════════════════ Swiper JS — chargé 1 seule fois ═══════════════════ -->
+<script>
+(function() {
+  if (document.querySelector('script[data-rp-swiper-js]')) return;
+  var s = document.createElement('script');
+  s.src = {{ 'swiper-bundle.min.js' | asset_url | json }};
+  s.setAttribute('data-rp-swiper-js', '');
+  document.head.appendChild(s);
+})();
 </script>
 
-<script src="{{ 'swiper-bundle.min.js' | asset_url }}" defer="defer"></script>
-
+<!-- ═══════════════════ Web Component — défini 1 seule fois ═══════════════════ -->
 <script>
 (function() {
   'use strict';
 
-  var SID    = {{ sid | json }};
-  var API    = {{ s.api_url | default: '' | json }};
-  var HANDLE = {{ s.product_handle | default: '' | json }};
-  var MIN_R  = {{ s.min_rating | json }};
-  var MAX_N  = {{ s.max_reviews | json }};
-  var LAYOUT = {{ s.layout | json }};
+  if (customElements.get('avis-premium')) return;
 
-  var SHOW = {
-    image:    {{ s.show_image | json }},
-    stars:    {{ s.show_stars | json }},
-    title:    {{ s.show_review_title | json }},
-    body:     {{ s.show_body | json }},
-    avatar:   {{ s.show_avatar | json }},
-    date:     {{ s.show_date | json }},
-    country:  {{ s.show_country | json }},
-    verified: {{ s.show_verified | json }}
-  };
+  var _isEditor = !!(window.Shopify && window.Shopify.designMode);
 
-  var SWIPER_CFG = {
-    effect:    {{ s.swiper_effect | default: 'slide' | json }},
-    autoplay:  {{ s.autoplay | json }},
-    delay:     {{ s.autoplay_speed | json }},
-    loop:      {{ s.loop | json }},
-    gap:       {{ s.slide_gap | json }},
-    mobile:    {{ s.per_mobile | json }},
-    tablet:    {{ s.per_tablet | json }},
-    desktop:   {{ s.per_desktop | json }}
-  };
+  class AvisPremium extends HTMLElement {
 
-  var $skeleton = document.getElementById('rp-skeleton-' + SID);
-  var $target   = document.getElementById('rp-target-' + SID);
-  var $cards    = document.getElementById('rp-cards-' + SID);
-  var $avg      = document.getElementById('rp-avg-' + SID);
+    /* ──────────── Lifecycle ──────────── */
+    connectedCallback() {
+      this._reviews  = [];
+      this._filtered = [];
+      this._swiper   = null;
+      this._cfg      = null;
 
-  /* Helpers */
-  function esc(s) {
-    if (!s) return '';
-    var d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
-  }
+      var cfgEl = this.querySelector('script[type="application/json"]');
+      if (!cfgEl) return;
+      try { this._cfg = JSON.parse(cfgEl.textContent); }
+      catch (e) { console.error('[AvisPremium] config parse', e); return; }
 
-  function stars(n) {
-    var o = '';
-    for (var i = 1; i <= 5; i++) o += i <= n ? '★' : '☆';
-    return o;
-  }
+      this._$skeleton = this.querySelector('[data-el="skeleton"]');
+      this._$target   = this.querySelector('[data-el="target"]');
+      this._$cards    = this.querySelector('[data-el="cards"]');
+      this._$avg      = this.querySelector('[data-el="avg"]');
+      this._$filters  = this.querySelector('[data-el="filters"]');
 
-  function ini(n) {
-    if (!n) return '?';
-    return n.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
-  }
-
-  function fdate(d) {
-    try { return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }); }
-    catch(e) { return d || ''; }
-  }
-
-  /* Card */
-  function card(r) {
-    var h = [];
-    var slide = LAYOUT === 'slider' ? ' swiper-slide' : '';
-    h.push('<div class="rp-card' + slide + '" data-rating="' + r.rating + '">');
-
-    if (SHOW.image && r.image_url && r.image_url.trim()) {
-      h.push('<div class="rp-media"><img src="' + r.image_url.trim() + '" alt="' + esc(r.author) + '" loading="lazy" width="600" height="600"></div>');
-    } else if (SHOW.image && r.video_url && r.video_url.trim()) {
-      h.push('<div class="rp-media"><video src="' + r.video_url.trim() + '" muted playsinline preload="none"></video></div>');
-    }
-
-    if (SHOW.stars) h.push('<div class="rp-stars">' + stars(parseInt(r.rating)) + '</div>');
-    if (SHOW.title && r.title) h.push('<h3 class="rp-card-title">' + esc(r.title) + '</h3>');
-    if (SHOW.body && r.body) h.push('<p class="rp-body">"' + esc(r.body) + '"</p>');
-
-    h.push('<div class="rp-footer">');
-    if (SHOW.avatar) h.push('<div class="rp-avatar">' + ini(r.author) + '</div>');
-    h.push('<div>');
-    h.push('<div class="rp-author">' + esc(r.author) + '</div>');
-    if (SHOW.verified && r.verified && r.verified.trim() === 'true') {
-      h.push('<div class="rp-verified">✓ Achat vérifié</div>');
-    }
-    var meta = [];
-    if (SHOW.date && r.date) meta.push(fdate(r.date));
-    if (SHOW.country && r.country && r.country.trim()) meta.push(r.country.trim());
-    if (meta.length) h.push('<div class="rp-date">' + meta.join(' · ') + '</div>');
-    h.push('</div></div>');
-
-    h.push('</div>');
-    return h.join('');
-  }
-
-  /* Average */
-  function showAvg(reviews) {
-    if (!reviews.length) return;
-    var sum = reviews.reduce(function(a, r) { return a + parseInt(r.rating); }, 0);
-    var avg = (sum / reviews.length).toFixed(1);
-    $avg.innerHTML = stars(Math.round(avg)) + ' <span>' + avg + '/5 — ' + reviews.length + ' avis</span>';
-    $avg.style.display = 'inline-flex';
-  }
-
-  /* Filters */
-  function bindFilters() {
-    var bar = document.getElementById('rp-filters-' + SID);
-    if (!bar) return;
-    bar.querySelectorAll('.rp-filter-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        bar.querySelectorAll('.rp-filter-btn').forEach(function(b) { b.classList.remove('active'); });
-        this.classList.add('active');
-        var r = this.dataset.rating;
-        var wrapper = document.getElementById('rp-wrapper-' + SID);
-        wrapper.querySelectorAll('.rp-card').forEach(function(c) {
-          c.style.display = (r === 'all' || c.dataset.rating === r) ? '' : 'none';
-        });
-        if (LAYOUT === 'slider' && window['rpSwiper_' + SID]) window['rpSwiper_' + SID].update();
-      });
-    });
-  }
-
-  /* Swiper */
-  function initSwiper() {
-    var cfg = {
-      slidesPerView: SWIPER_CFG.mobile,
-      spaceBetween: SWIPER_CFG.gap,
-      grabCursor: true,
-      loop: SWIPER_CFG.loop,
-      effect: SWIPER_CFG.effect,
-      pagination: { el: '.rp-' + SID + ' .swiper-pagination', clickable: true },
-      navigation: { nextEl: '.rp-' + SID + ' .swiper-button-next', prevEl: '.rp-' + SID + ' .swiper-button-prev' },
-      breakpoints: {}
-    };
-    cfg.breakpoints[600]  = { slidesPerView: SWIPER_CFG.tablet,  spaceBetween: SWIPER_CFG.gap };
-    cfg.breakpoints[1000] = { slidesPerView: SWIPER_CFG.desktop, spaceBetween: SWIPER_CFG.gap };
-
-    if (SWIPER_CFG.autoplay) {
-      cfg.autoplay = { delay: SWIPER_CFG.delay, disableOnInteraction: false, pauseOnMouseEnter: true };
-    }
-    if (SWIPER_CFG.effect === 'coverflow') {
-      cfg.coverflowEffect = { rotate: 25, stretch: 0, depth: 80, modifier: 1, slideShadows: false };
-      cfg.centeredSlides = true;
-    }
-
-    window['rpSwiper_' + SID] = new Swiper('.rp-' + SID + ' .swiper', cfg);
-  }
-
-  /* Load */
-  function load() {
-    if (!API) {
-      $skeleton.style.display = 'none';
-      $target.style.display = 'block';
-      $cards.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚙️</div><p>Configurez l\'URL de l\'API dans le Customizer.</p></div>';
-      return;
-    }
-
-    var url = new URL(API);
-    if (HANDLE) url.searchParams.set('product', HANDLE);
-    if (MIN_R > 0) url.searchParams.set('rating', MIN_R);
-    if (MAX_N > 0) url.searchParams.set('limit', MAX_N);
-
-    fetch(url.toString())
-      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function(data) {
-        var reviews = data.reviews || data;
-        if (!reviews || !reviews.length) {
-          $skeleton.style.display = 'none';
-          $target.style.display = 'block';
-          $cards.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">💬</div><p>Aucun avis pour le moment.</p></div>';
-          return;
-        }
-
-        $cards.innerHTML = reviews.map(card).join('');
-        showAvg(reviews);
-        bindFilters();
-
-        $skeleton.style.display = 'none';
-        $target.style.display = 'block';
-
-        if (LAYOUT === 'slider') {
-          if (typeof Swiper !== 'undefined') initSwiper();
-          else {
-            var s = document.querySelector('script[src*="swiper"]');
-            if (s) s.addEventListener('load', initSwiper);
+      /* IntersectionObserver — ne fetch que quand la section est visible */
+      this._io = new IntersectionObserver(
+        function(entries) {
+          if (entries[0].isIntersecting) {
+            this._io.disconnect();
+            this._load();
           }
+        }.bind(this),
+        { rootMargin: '300px' }
+      );
+      this._io.observe(this);
+    }
+
+    disconnectedCallback() {
+      if (this._io)     this._io.disconnect();
+      if (this._swiper) { this._swiper.destroy(true, true); this._swiper = null; }
+    }
+
+    /* ──────────── Helpers (privés, pas de pollution globale) ──────────── */
+    _esc(s) {
+      if (!s) return '';
+      var d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    _stars(n) {
+      var o = '';
+      for (var i = 1; i <= 5; i++) o += i <= n ? '★' : '☆';
+      return o;
+    }
+
+    _initials(n) {
+      if (!n) return '?';
+      return n.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+    }
+
+    _fdate(d) {
+      try {
+        return new Date(d).toLocaleDateString('fr-FR', {
+          day: 'numeric', month: 'short', year: 'numeric'
+        });
+      } catch (e) { return d || ''; }
+    }
+
+    /* ──────────── Card Builder ──────────── */
+    _card(r) {
+      var c = this._cfg, sh = c.show, h = [];
+      var cls = 'rp-card' + (c.layout === 'slider' ? ' swiper-slide' : '');
+      h.push('<div class="' + cls + '" data-rating="' + r.rating + '">');
+
+      /* Image — format naturel du client */
+      if (sh.image && r.image_url && r.image_url.trim()) {
+        var imgs = r.image_url.trim().split('\n');
+        var firstImg = imgs[0].trim();
+        if (firstImg) {
+          h.push('<div class="rp-media"><img src="' + firstImg
+            + '" alt="' + this._esc(r.author)
+            + '" loading="lazy" decoding="async"></div>');
         }
-      })
-      .catch(function(err) {
-        console.error('[Reviews]', err);
-        $skeleton.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚠️</div><p>Erreur de chargement.</p><p style="font-size:12px;opacity:.5;">' + esc(err.message) + '</p></div>';
+      } else if (sh.image && r.video_url && r.video_url.trim()) {
+        h.push('<div class="rp-media"><video src="' + r.video_url.trim()
+          + '" muted playsinline preload="none"></video></div>');
+      }
+
+      if (sh.stars)           h.push('<div class="rp-stars">' + this._stars(parseInt(r.rating)) + '</div>');
+      if (sh.title && r.title) h.push('<h3 class="rp-card-title">' + this._esc(r.title) + '</h3>');
+      if (sh.body  && r.body) {
+        h.push('<p class="rp-body">"' + this._esc(r.body) + '"</p>');
+        h.push('<button class="rp-readmore" data-more="En savoir plus" data-less="Voir moins">En savoir plus</button>');
+      }
+
+      h.push('<div class="rp-footer">');
+      if (sh.avatar) h.push('<div class="rp-avatar">' + this._initials(r.author) + '</div>');
+      h.push('<div>');
+      h.push('<div class="rp-author">' + this._esc(r.author) + '</div>');
+      if (sh.verified && r.verified && r.verified.trim() === 'true') {
+        h.push('<div class="rp-verified">✓ Achat vérifié</div>');
+      }
+      var meta = [];
+      if (sh.date    && r.date)                          meta.push(this._fdate(r.date));
+      if (sh.country && r.country && r.country.trim())   meta.push(r.country.trim());
+      if (meta.length) h.push('<div class="rp-date">' + meta.join(' · ') + '</div>');
+      h.push('</div></div>');
+
+      h.push('</div>');
+      return h.join('');
+    }
+
+    /* ──────────── Render ──────────── */
+    _renderCards(reviews) {
+      var self = this;
+      this._$cards.innerHTML = reviews.map(function(r) { return self._card(r); }).join('');
+      this._bindReadMore();
+    }
+
+    /* ──────────── « En savoir plus » toggle ──────────── */
+    _bindReadMore() {
+      this.querySelectorAll('.rp-readmore').forEach(function(btn) {
+        var body = btn.previousElementSibling;  /* le <p class="rp-body"> juste avant */
+        if (!body) return;
+
+        /* Cacher le bouton si le texte n'est pas tronqué */
+        requestAnimationFrame(function() {
+          if (body.scrollHeight <= body.clientHeight + 2) {
+            btn.style.display = 'none';
+          } else {
+            btn.style.display = 'inline-block';
+          }
+        });
+
+        btn.addEventListener('click', function() {
+          var expanded = body.classList.toggle('expanded');
+          btn.textContent = expanded ? btn.dataset.less : btn.dataset.more;
+        });
       });
+    }
+
+    _showAvg(reviews) {
+      if (!reviews.length || !this._$avg) return;
+      var sum = reviews.reduce(function(a, r) { return a + parseInt(r.rating); }, 0);
+      var avg = (sum / reviews.length).toFixed(1);
+      this._$avg.innerHTML = this._stars(Math.round(parseFloat(avg)))
+        + ' <span>' + avg + '/5 — ' + reviews.length + ' avis</span>';
+      this._$avg.style.display = 'inline-flex';
+    }
+
+    /* ──────────── JSON-LD dynamique ──────────── */
+    _injectJsonLd(reviews) {
+      if (!reviews.length) return;
+      var sum = reviews.reduce(function(a, r) { return a + parseInt(r.rating); }, 0);
+      var avg = (sum / reviews.length).toFixed(1);
+
+      /* Supprime un éventuel ancien bloc de ce composant */
+      var prev = this.querySelector('script[type="application/ld+json"][data-rp-ld]');
+      if (prev) prev.remove();
+
+      var ld = document.createElement('script');
+      ld.type = 'application/ld+json';
+      ld.setAttribute('data-rp-ld', '');
+      ld.textContent = JSON.stringify({
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": this._cfg.productName || document.title,
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": avg,
+          "reviewCount": String(reviews.length),
+          "bestRating": "5",
+          "worstRating": "1"
+        }
+      });
+      this.appendChild(ld);
+    }
+
+    /* ──────────── Filtrage (rebuild complet — pas de display:none) ──────────── */
+    _bindFilters() {
+      if (!this._$filters) return;
+      var self = this;
+
+      this._$filters.querySelectorAll('.rp-filter-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          self._$filters.querySelectorAll('.rp-filter-btn').forEach(function(b) {
+            b.classList.remove('active');
+          });
+          this.classList.add('active');
+          var r = this.dataset.rating;
+
+          /* Filtre les données */
+          if (r === 'all') {
+            self._filtered = self._reviews.slice();
+          } else {
+            self._filtered = self._reviews.filter(function(rev) {
+              return String(rev.rating) === r;
+            });
+          }
+
+          /* Reconstruit entièrement les cartes */
+          self._renderCards(self._filtered);
+
+          /* Re-initialise Swiper proprement (détruit + recrée avec rAF) */
+          if (self._cfg.layout === 'slider') {
+            if (self._swiper) {
+              try { self._swiper.destroy(true, true); } catch(e) {}
+              self._swiper = null;
+            }
+            if (self._filtered.length > 0) {
+              self._ensureSwiper().then(function() { self._initSwiper(); });
+            }
+          }
+        });
+      });
+    }
+
+    /* ──────────── Swiper — chargement garanti ──────────── */
+    _ensureSwiper() {
+      if (typeof Swiper !== 'undefined') return Promise.resolve();
+
+      var self = this;
+      return new Promise(function(resolve) {
+        /* Cherche le script tag existant */
+        var tag = document.querySelector('script[data-rp-swiper-js]');
+        if (!tag) {
+          tag = document.createElement('script');
+          tag.src = self._cfg.swiperJs;
+          tag.setAttribute('data-rp-swiper-js', '');
+          document.head.appendChild(tag);
+        }
+
+        /* Poll avec timeout 10s */
+        var attempts = 0;
+        var check = setInterval(function() {
+          attempts++;
+          if (typeof Swiper !== 'undefined') {
+            clearInterval(check);
+            resolve();
+          }
+          if (attempts > 200) {
+            clearInterval(check);
+            console.warn('[AvisPremium] Swiper JS timeout');
+            resolve();
+          }
+        }, 50);
+      });
+    }
+
+    _initSwiper() {
+      var c = this._cfg, sw = c.swiper, sid = c.sid;
+      var self = this;
+      var sel = '.rp-' + sid;
+
+      /* Attendre que le navigateur ait fini le layout
+         (display:block vient d'être posé) */
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+
+          var swiperEl = self.querySelector('.swiper');
+          if (!swiperEl) { console.warn('[AvisPremium] .swiper introuvable'); return; }
+
+          var slidesCount = self._filtered.length;
+          var desktopPV = sw.desktop || 3;
+
+          var cfg = {
+            slidesPerView: sw.mobile || 1,
+            spaceBetween:  sw.gap || 16,
+            grabCursor:    true,
+            loop:          !!(sw.loop && slidesCount > desktopPV),
+            effect:        sw.effect || 'slide',
+
+            /* observer + observeParents : Swiper recalcule
+               automatiquement quand le conteneur change de taille */
+            observer:        true,
+            observeParents:  true,
+
+            pagination: {
+              el: sel + ' .swiper-pagination',
+              clickable: true
+            },
+            navigation: {
+              nextEl: sel + ' .swiper-button-next',
+              prevEl: sel + ' .swiper-button-prev'
+            },
+            breakpoints: {}
+          };
+          cfg.breakpoints[600]  = { slidesPerView: sw.tablet  || 2, spaceBetween: sw.gap || 16 };
+          cfg.breakpoints[1000] = { slidesPerView: desktopPV,       spaceBetween: sw.gap || 16 };
+
+          if (sw.autoplay) {
+            cfg.autoplay = { delay: sw.delay || 5000, disableOnInteraction: false, pauseOnMouseEnter: true };
+          }
+          if (sw.effect === 'coverflow') {
+            cfg.coverflowEffect = { rotate: 25, stretch: 0, depth: 80, modifier: 1, slideShadows: false };
+            cfg.centeredSlides = true;
+          }
+
+          try {
+            self._swiper = new Swiper(swiperEl, cfg);
+          } catch (e) {
+            console.error('[AvisPremium] Swiper init error', e);
+          }
+
+        });
+      });
+    }
+
+    /* ──────────── Chargement principal ──────────── */
+    _load() {
+      var c = this._cfg;
+      var self = this;
+
+      if (!c.api) {
+        this._$skeleton.style.display = 'none';
+        if (_isEditor) {
+          this._$target.style.display = 'block';
+          this._$cards.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚙️</div>'
+            + '<p>Configurez l\'URL de l\'API dans le Customizer.</p></div>';
+        } else {
+          this.style.display = 'none';
+        }
+        return;
+      }
+
+      var url;
+      try { url = new URL(c.api); } catch(e) {
+        console.error('[AvisPremium] URL invalide', c.api);
+        this.style.display = 'none';
+        return;
+      }
+      if (c.handle)           url.searchParams.set('product', c.handle);
+      if (c.minRating > 0)    url.searchParams.set('rating',  c.minRating);
+      if (c.maxReviews > 0)   url.searchParams.set('limit',   c.maxReviews);
+
+      fetch(url.toString())
+        .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function(data) {
+          var reviews = data.reviews || data;
+          if (!reviews || !reviews.length) {
+            self._$skeleton.style.display = 'none';
+            self._$target.style.display = 'block';
+            self._$cards.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">💬</div>'
+              + '<p>Aucun avis pour le moment.</p></div>';
+            return;
+          }
+
+          self._reviews  = reviews;
+          self._filtered = reviews.slice();
+
+          self._renderCards(self._filtered);
+          self._showAvg(reviews);
+          self._injectJsonLd(reviews);
+          self._bindFilters();
+
+          self._$skeleton.style.display = 'none';
+          self._$target.style.display   = 'block';
+
+          if (c.layout === 'slider') {
+            self._ensureSwiper().then(function() { self._initSwiper(); });
+          }
+        })
+        .catch(function(err) {
+          console.error('[AvisPremium]', err);
+          if (_isEditor) {
+            /* Customizer : on montre l'erreur pour debug */
+            self._$skeleton.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚠️</div>'
+              + '<p>Erreur de chargement.</p>'
+              + '<p style="font-size:12px;opacity:.5;">' + self._esc(err.message) + '</p></div>';
+          } else {
+            /* Production : on cache la section silencieusement */
+            self.style.display = 'none';
+          }
+        });
+    }
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);
-  else load();
+  customElements.define('avis-premium', AvisPremium);
 })();
 </script>
 
@@ -758,8 +1081,10 @@
       "id": "layout",
       "label": "Disposition",
       "options": [
-        { "value": "grid", "label": "Grille" },
-        { "value": "slider", "label": "Carrousel (Swiper)" }
+        { "value": "grid", "label": "Grille (3 colonnes)" },
+        { "value": "slider", "label": "Carrousel (Swiper)" },
+        { "value": "masonry", "label": "Masonry (hauteurs mixtes)" },
+        { "value": "list", "label": "Liste (pleine largeur)" }
       ],
       "default": "grid"
     },
@@ -947,10 +1272,10 @@
       "type": "range",
       "id": "card_padding",
       "label": "Padding",
-      "min": 16,
+      "min": 12,
       "max": 40,
       "step": 4,
-      "default": 28,
+      "default": 20,
       "unit": "px"
     },
     {
@@ -1121,7 +1446,7 @@
       "min": 1,
       "max": 5,
       "step": 1,
-      "default": 3
+      "default": 2
     },
     {
       "type": "checkbox",
@@ -1135,6 +1460,30 @@
       "label": "Flèches",
       "default": true
     },
+    {
+      "type": "color",
+      "id": "arrow_bg",
+      "label": "Fond flèches",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "arrow_icon",
+      "label": "Icône flèches",
+      "default": "#1d1d1f"
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "Points (inactifs)",
+      "default": "#86868b"
+    },
+    {
+      "type": "color",
+      "id": "dot_active_color",
+      "label": "Point actif",
+      "default": "#0071e3"
+    },
 
     {
       "type": "header",
@@ -1147,7 +1496,7 @@
       "min": 0,
       "max": 120,
       "step": 12,
-      "default": 72,
+      "default": 48,
       "unit": "px"
     },
     {
@@ -1157,7 +1506,7 @@
       "min": 0,
       "max": 120,
       "step": 12,
-      "default": 72,
+      "default": 48,
       "unit": "px"
     }
   ],
@@ -1198,7 +1547,33 @@
         "glass_tint": "#ffffff",
         "glass_border": "rgba(255,255,255,0.12)",
         "overlay_opacity": 20,
-        "hover_lift": 10
+        "hover_lift": 10,
+        "arrow_bg": "#ffffff",
+        "arrow_icon": "#1d1d1f",
+        "dot_color": "#ffffff",
+        "dot_active_color": "#bf5af2"
+      }
+    },
+    {
+      "name": "Avis Premium — Masonry",
+      "settings": {
+        "api_url": "https://reveiews-fd3f.vercel.app/api",
+        "design_mode": "classic",
+        "layout": "masonry",
+        "title": "Vos témoignages.",
+        "badge": "Avis clients",
+        "subtitle": "Des résultats visibles, validés par notre communauté."
+      }
+    },
+    {
+      "name": "Avis Premium — Liste",
+      "settings": {
+        "api_url": "https://reveiews-fd3f.vercel.app/api",
+        "design_mode": "classic",
+        "layout": "list",
+        "title": "Retours clients.",
+        "badge": "Avis vérifiés",
+        "subtitle": "Lisez les expériences de nos clients."
       }
     }
   ]

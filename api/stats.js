@@ -12,7 +12,13 @@ export default async function handler(req, res) {
   const csvPath = path.join(process.cwd(), 'data', 'reviews.csv');
 
   try {
-    const reviews = await csv().fromFile(csvPath);
+    const rawReviews = await csv().fromFile(csvPath);
+
+    // ── Filtrer les lignes invalides (doublons d'en-tête, lignes vides, rating non numérique) ──
+    const reviews = rawReviews.filter((r) => {
+      const n = parseInt(r.rating, 10);
+      return !isNaN(n) && n >= 1 && n <= 5;
+    });
     const total = reviews.length;
 
     // ── Note moyenne ──

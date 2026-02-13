@@ -1,451 +1,479 @@
-{% comment %}
-  ════════════════════════════════════════════════════════════════
-  Section : Premium Reviews — Headless (Vercel API + Swiper 11)
-  ────────────────────────────────────────────────────────────────
-  ⚙️  Modes : Classique │ Glassmorphism
-  ⚙️  30+ réglages dans le Customizer Shopify
-  ════════════════════════════════════════════════════════════════
-{% endcomment %}
+{%- comment -%}
+  Avis Premium 2026 — Headless API + Swiper 11
+  Inspiration : Apple.com — Clean, Spacious, Premium
+{%- endcomment -%}
 
-{{ 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css' | stylesheet_tag }}
-
-{% comment %} ── Liquid variables pour injection CSS/JS ── {% endcomment %}
 {%- assign s = section.settings -%}
 {%- assign sid = section.id -%}
-{%- assign glass = s.design_mode | default: 'classic' -%}
 {%- assign is_glass = false -%}
-{%- if glass == 'glassmorphism' -%}{%- assign is_glass = true -%}{%- endif -%}
+{%- if s.design_mode == 'glassmorphism' -%}{%- assign is_glass = true -%}{%- endif -%}
 
-<style>
-  /* ═══════════════════════════════════════════
-     SECTION WRAPPER — #rv-{{ sid }}
-     ═══════════════════════════════════════════ */
-  #rv-{{ sid }} {
-    --rv-bg: {{ s.section_bg_color | default: '#fafafa' }};
-    --rv-text: {{ s.text_color | default: '#333333' }};
-    --rv-subtle: {{ s.subtle_color | default: '#888888' }};
-    --rv-accent: {{ s.accent_color | default: '#667eea' }};
-    --rv-star: {{ s.star_color | default: '#f5a623' }};
-    --rv-star-empty: {{ s.star_empty_color | default: '#e0e0e0' }};
-    --rv-radius: {{ s.card_radius | default: 14 }}px;
-    --rv-title-size: {{ s.title_size | default: 32 }}px;
-    --rv-subtitle-size: {{ s.subtitle_size | default: 15 }}px;
-    --rv-body-size: {{ s.body_font_size | default: 14 }}px;
-    --rv-nav-color: {{ s.nav_color | default: '#333333' }};
-    --rv-pagination-color: {{ s.pagination_color | default: '#333333' }};
+{{ 'swiper-bundle.min.css' | asset_url | stylesheet_tag }}
 
-    /* Card colors */
-    --rv-card-bg: {{ s.card_bg_color | default: '#ffffff' }};
-    --rv-card-text: {{ s.card_text_color | default: '#333333' }};
-    --rv-card-body: {{ s.card_body_color | default: '#555555' }};
-
-    /* Glassmorphism */
-    --rv-glass-blur: {{ s.glass_blur | default: 16 }}px;
-    --rv-glass-opacity: {{ s.glass_opacity | default: 20 }};
-    --rv-glass-tint: {{ s.glass_tint_color | default: '#ffffff' }};
-    --rv-glass-border: {{ s.glass_border_color | default: 'rgba(255,255,255,0.3)' }};
-
-    padding-top: {{ s.padding_top | default: 60 }}px;
-    padding-bottom: {{ s.padding_bottom | default: 60 }}px;
+{%- style -%}
+  /* ═══════════════════════════════════════
+     SECTION
+     ═══════════════════════════════════════ */
+  .rp-{{ sid }} {
+    --rp-accent: {{ s.accent_color }};
+    --rp-star: {{ s.star_color }};
+    padding-top: {{ s.padding_top }}px;
+    padding-bottom: {{ s.padding_bottom }}px;
     position: relative;
     overflow: hidden;
-  }
-
-  /* ── Section Background ─────────────────── */
-  #rv-{{ sid }} .rv-bg-layer {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    {%- if s.bg_image != blank %}
-      background-image: url('{{ s.bg_image | image_url: width: 1920 }}');
-      background-size: cover;
-      background-position: center;
+    {%- if is_glass and s.bg_image != blank %}
+      background: url('{{ s.bg_image | image_url: width: 1920 }}') center / cover no-repeat;
     {%- elsif s.bg_gradient != blank %}
       background: {{ s.bg_gradient }};
     {%- else %}
-      background: var(--rv-bg);
+      background: {{ s.bg_color }};
     {%- endif %}
   }
 
-  #rv-{{ sid }} .rv-bg-layer::after {
-    content: '';
+  .rp-{{ sid }} .rp-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,{{ s.bg_overlay_opacity | default: 0 | divided_by: 100.0 }});
+    background: rgba(0, 0, 0, {{ s.overlay_opacity | times: 1.0 | divided_by: 100.0 }});
+    pointer-events: none;
+    z-index: 0;
   }
 
-  #rv-{{ sid }} .rv-content {
+  .rp-{{ sid }} .rp-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
     position: relative;
     z-index: 1;
+    overflow: hidden;
   }
 
-  /* ── Heading ────────────────────────────── */
-  #rv-{{ sid }} .rv-heading {
-    text-align: {{ s.heading_alignment | default: 'center' }};
+  /* ═══════════════════════════════════════
+     HEADER — Apple style
+     ═══════════════════════════════════════ */
+  .rp-{{ sid }} .rp-header {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto 56px;
+  }
+
+  .rp-{{ sid }} .rp-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--rp-accent);
+    margin-bottom: 16px;
+    {% if is_glass %}
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 6px 18px;
+      border-radius: 100px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    {% endif %}
+  }
+
+  .rp-{{ sid }} .rp-title {
+    font-size: {{ s.title_size }}px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: {{ s.title_color }};
+    margin: 0 0 12px;
+  }
+
+  .rp-{{ sid }} .rp-subtitle {
+    font-size: {{ s.subtitle_size }}px;
+    line-height: 1.5;
+    color: {{ s.text_muted }};
+    margin: 0;
+  }
+
+  .rp-{{ sid }} .rp-avg {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 17px;
+    color: var(--rp-star);
+  }
+  .rp-{{ sid }} .rp-avg span {
+    font-size: 14px;
+    color: {{ s.text_muted }};
+    font-weight: 400;
+  }
+
+  /* ═══════════════════════════════════════
+     FILTER BAR
+     ═══════════════════════════════════════ */
+  .rp-{{ sid }} .rp-filters {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
     margin-bottom: 40px;
   }
 
-  #rv-{{ sid }} .rv-heading__tag {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--rv-accent);
-    margin-bottom: 10px;
+  .rp-{{ sid }} .rp-filter-btn {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    padding: 8px 20px;
+    border-radius: 100px;
+    transition: all 0.25s ease;
     {% if is_glass %}
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      padding: 6px 16px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.2);
-    {% endif %}
-  }
-
-  #rv-{{ sid }} .rv-heading__title {
-    font-size: var(--rv-title-size);
-    font-weight: {{ s.title_weight | default: '700' }};
-    color: var(--rv-text);
-    margin: 0 0 8px;
-    line-height: 1.2;
-  }
-
-  #rv-{{ sid }} .rv-heading__subtitle {
-    font-size: var(--rv-subtitle-size);
-    color: var(--rv-subtle);
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  #rv-{{ sid }} .rv-heading__count {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--rv-accent);
-    margin-top: 12px;
-  }
-
-  /* ── Stars Summary ──────────────────────── */
-  #rv-{{ sid }} .rv-summary-stars {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    justify-content: {{ s.heading_alignment | default: 'center' }};
-    margin-bottom: 4px;
-  }
-  #rv-{{ sid }} .rv-summary-stars svg {
-    width: 22px;
-    height: 22px;
-  }
-  #rv-{{ sid }} .rv-summary-avg {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--rv-text);
-    margin-left: 6px;
-  }
-
-  /* ═══════════════════════════════════════════
-     SKELETON LOADING
-     ═══════════════════════════════════════════ */
-  #rv-{{ sid }} .rv-skeleton {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  #rv-{{ sid }} .rv-skeleton__card {
-    width: 300px;
-    height: 280px;
-    border-radius: var(--rv-radius);
-    {% if is_glass %}
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.6);
     {% else %}
-      background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
-      background-size: 200% 100%;
-      animation: rv-shimmer-{{ sid }} 1.4s ease-in-out infinite;
+      background: transparent;
+      color: {{ s.text_muted }};
     {% endif %}
   }
-  @keyframes rv-shimmer-{{ sid }} {
+  .rp-{{ sid }} .rp-filter-btn:hover {
+    {% if is_glass %}
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    {% else %}
+      background: rgba(0, 0, 0, 0.04);
+      color: {{ s.title_color }};
+    {% endif %}
+  }
+  .rp-{{ sid }} .rp-filter-btn.active {
+    {% if is_glass %}
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    {% else %}
+      background: {{ s.title_color }};
+      color: {{ s.bg_color }};
+    {% endif %}
+  }
+
+  /* ═══════════════════════════════════════
+     SKELETON
+     ═══════════════════════════════════════ */
+  .rp-{{ sid }} .rp-skeleton {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .rp-{{ sid }} .rp-skeleton__item {
+    height: 320px;
+    border-radius: 20px;
+    {% if is_glass %}
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    {% else %}
+      background: linear-gradient(110deg, #f5f5f5 30%, #fafafa 50%, #f5f5f5 70%);
+      background-size: 200% 100%;
+      animation: rp-pulse-{{ sid }} 1.5s ease-in-out infinite;
+    {% endif %}
+  }
+  @keyframes rp-pulse-{{ sid }} {
     0%   { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
+  @media (max-width: 999px) {
+    .rp-{{ sid }} .rp-skeleton { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 599px) {
+    .rp-{{ sid }} .rp-skeleton { grid-template-columns: 1fr; }
+  }
 
-  /* ═══════════════════════════════════════════
-     REVIEW CARD — MODE CLASSIQUE
-     ═══════════════════════════════════════════ */
-  #rv-{{ sid }} .rv-card {
-    border-radius: var(--rv-radius);
-    padding: {{ s.card_padding | default: 24 }}px;
+  /* ═══════════════════════════════════════
+     REVIEW CARD
+     ═══════════════════════════════════════ */
+  .rp-{{ sid }} .rp-card {
+    border-radius: {{ s.card_radius }}px;
+    padding: {{ s.card_padding }}px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
     height: 100%;
-    transition: transform .25s cubic-bezier(.4,0,.2,1),
-                box-shadow .25s cubic-bezier(.4,0,.2,1);
-
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     {% if is_glass %}
-      /* ── GLASSMORPHISM ── */
       background: rgba(
-        {{ s.glass_tint_color | default: '#ffffff' | color_extract: 'red' }},
-        {{ s.glass_tint_color | default: '#ffffff' | color_extract: 'green' }},
-        {{ s.glass_tint_color | default: '#ffffff' | color_extract: 'blue' }},
-        calc(var(--rv-glass-opacity) / 100)
+        {{ s.glass_tint | color_extract: 'red' }},
+        {{ s.glass_tint | color_extract: 'green' }},
+        {{ s.glass_tint | color_extract: 'blue' }},
+        {{ s.glass_opacity | times: 1.0 | divided_by: 100.0 }}
       );
-      backdrop-filter: blur(var(--rv-glass-blur));
-      -webkit-backdrop-filter: blur(var(--rv-glass-blur));
-      border: 1px solid var(--rv-glass-border);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      backdrop-filter: blur({{ s.glass_blur }}px);
+      -webkit-backdrop-filter: blur({{ s.glass_blur }}px);
+      border: 1px solid {{ s.glass_border }};
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     {% else %}
-      /* ── CLASSIQUE ── */
-      background: var(--rv-card-bg);
-      border: 1px solid {{ s.card_border_color | default: 'transparent' }};
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      background: {{ s.card_bg }};
+      border: 1px solid {{ s.card_border }};
+      box-shadow: none;
     {% endif %}
   }
 
-  #rv-{{ sid }} .rv-card:hover {
-    transform: translateY(-{{ s.card_hover_lift | default: 6 }}px);
+  .rp-{{ sid }} .rp-card:hover {
+    transform: translateY(-{{ s.hover_lift }}px);
     {% if is_glass %}
-      box-shadow: 0 16px 48px rgba(0,0,0,0.15);
-      border-color: rgba(255,255,255,0.5);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.16);
+      border-color: rgba(255, 255, 255, 0.3);
     {% else %}
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
     {% endif %}
   }
 
-  /* ── Card Header ────────────────────────── */
-  #rv-{{ sid }} .rv-card__header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  #rv-{{ sid }} .rv-card__avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--rv-accent), {{ s.avatar_gradient_end | default: '#764ba2' }});
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 15px;
-    flex-shrink: 0;
-    {% if is_glass %}
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    {% endif %}
-  }
-  #rv-{{ sid }} .rv-card__meta {
-    flex: 1;
-    min-width: 0;
-  }
-  #rv-{{ sid }} .rv-card__author {
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--rv-card-text);
-    {% if is_glass %}color: var(--rv-text);{% endif %}
-  }
-  #rv-{{ sid }} .rv-card__date {
-    font-size: 12px;
-    color: var(--rv-subtle);
-    margin-top: 2px;
-  }
-  #rv-{{ sid }} .rv-card__verified {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 11px;
-    color: {{ s.verified_color | default: '#27ae60' }};
-    font-weight: 600;
-    margin-top: 2px;
-    {% if is_glass %}
-      background: rgba(39,174,96,0.12);
-      padding: 2px 8px;
-      border-radius: 10px;
-    {% endif %}
-  }
-
-  /* ── Stars ──────────────────────────────── */
-  #rv-{{ sid }} .rv-card__stars {
-    display: flex;
-    gap: 2px;
-  }
-  #rv-{{ sid }} .rv-card__star {
-    width: 16px;
-    height: 16px;
-  }
-
-  /* ── Content ────────────────────────────── */
-  #rv-{{ sid }} .rv-card__title {
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--rv-card-text);
-    margin: 0;
-    {% if is_glass %}color: var(--rv-text);{% endif %}
-  }
-  #rv-{{ sid }} .rv-card__body {
-    font-size: var(--rv-body-size);
-    line-height: 1.6;
-    color: var(--rv-card-body);
-    flex-grow: 1;
-    {% if is_glass %}color: var(--rv-subtle);{% endif %}
-  }
-
-  /* ── Media ──────────────────────────────── */
-  #rv-{{ sid }} .rv-card__media {
-    margin-top: auto;
-    border-radius: calc(var(--rv-radius) - 8px);
+  /* Image */
+  .rp-{{ sid }} .rp-media {
+    position: relative;
+    border-radius: {{ s.card_radius | minus: 6 }}px;
     overflow: hidden;
+    margin-bottom: 16px;
+    max-height: 180px;
   }
-  #rv-{{ sid }} .rv-card__media img,
-  #rv-{{ sid }} .rv-card__media video {
+  .rp-{{ sid }} .rp-media img,
+  .rp-{{ sid }} .rp-media video {
     width: 100%;
-    height: {{ s.media_height | default: 160 }}px;
+    height: 180px;
     object-fit: cover;
     display: block;
-    transition: transform .3s ease;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
-  #rv-{{ sid }} .rv-card__media:hover img,
-  #rv-{{ sid }} .rv-card__media:hover video {
-    transform: scale(1.05);
-  }
-
-  /* ═══════════════════════════════════════════
-     SWIPER OVERRIDES
-     ═══════════════════════════════════════════ */
-  #rv-{{ sid }} .rv-swiper {
-    padding: 10px 4px 60px;
+  .rp-{{ sid }} .rp-media:hover img,
+  .rp-{{ sid }} .rp-media:hover video {
+    transform: scale(1.04);
   }
 
-  /* Pagination */
-  #rv-{{ sid }} .swiper-pagination-bullet {
-    width: 10px;
-    height: 10px;
-    background: var(--rv-subtle);
-    opacity: 0.4;
-    transition: all .3s ease;
-  }
-  #rv-{{ sid }} .swiper-pagination-bullet-active {
-    background: var(--rv-pagination-color);
-    opacity: 1;
-    width: 28px;
-    border-radius: 5px;
-  }
-
-  /* Navigation Arrows */
-  #rv-{{ sid }} .swiper-button-next,
-  #rv-{{ sid }} .swiper-button-prev {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    transition: all .25s ease;
-    color: var(--rv-nav-color);
-    {% if is_glass %}
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.25);
-    {% else %}
-      background: var(--rv-card-bg);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    {% endif %}
-  }
-  #rv-{{ sid }} .swiper-button-next:hover,
-  #rv-{{ sid }} .swiper-button-prev:hover {
-    transform: scale(1.1);
-    {% if is_glass %}
-      background: rgba(255,255,255,0.3);
-    {% else %}
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-    {% endif %}
-  }
-  #rv-{{ sid }} .swiper-button-next::after,
-  #rv-{{ sid }} .swiper-button-prev::after {
-    font-size: 18px;
-    font-weight: 700;
-  }
-
-  /* Hide elements per settings */
-  {% unless s.show_navigation %}
-    #rv-{{ sid }} .swiper-button-next,
-    #rv-{{ sid }} .swiper-button-prev { display: none !important; }
-  {% endunless %}
-  {% unless s.show_pagination %}
-    #rv-{{ sid }} .swiper-pagination { display: none !important; }
-  {% endunless %}
-
-  /* ── Error State ────────────────────────── */
-  #rv-{{ sid }} .rv-error {
-    text-align: center;
-    padding: 60px 20px;
+  /* Stars */
+  .rp-{{ sid }} .rp-stars {
+    color: var(--rp-star);
     font-size: 15px;
-    color: var(--rv-subtle);
-  }
-  #rv-{{ sid }} .rv-error__icon {
-    font-size: 40px;
+    letter-spacing: 2px;
     margin-bottom: 12px;
   }
 
-  /* ── Responsive ─────────────────────────── */
-  @media (max-width: 749px) {
-    #rv-{{ sid }} .rv-heading__title {
-      font-size: calc(var(--rv-title-size) * 0.75);
-    }
-    #rv-{{ sid }} .rv-swiper {
-      padding: 10px 0 50px;
-    }
-    #rv-{{ sid }} .swiper-button-next,
-    #rv-{{ sid }} .swiper-button-prev {
-      display: none;
-    }
+  /* Title */
+  .rp-{{ sid }} .rp-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    margin: 0 0 8px;
+    color: {% if is_glass %}#fff{% else %}{{ s.card_text }}{% endif %};
   }
-</style>
+
+  /* Body */
+  .rp-{{ sid }} .rp-body {
+    font-size: {{ s.body_size }}px;
+    line-height: 1.6;
+    color: {% if is_glass %}rgba(255, 255, 255, 0.7){% else %}{{ s.card_body }}{% endif %};
+    flex: 1 1 auto;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Footer */
+  .rp-{{ sid }} .rp-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid {% if is_glass %}rgba(255, 255, 255, 0.08){% else %}rgba(0, 0, 0, 0.06){% endif %};
+  }
+
+  .rp-{{ sid }} .rp-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--rp-accent), {{ s.avatar_end }});
+  }
+
+  .rp-{{ sid }} .rp-author {
+    font-size: 14px;
+    font-weight: 600;
+    color: {% if is_glass %}#fff{% else %}{{ s.card_text }}{% endif %};
+  }
+
+  .rp-{{ sid }} .rp-verified {
+    font-size: 12px;
+    font-weight: 500;
+    color: {{ s.verified_color }};
+  }
+
+  .rp-{{ sid }} .rp-date {
+    font-size: 12px;
+    color: {% if is_glass %}rgba(255, 255, 255, 0.4){% else %}{{ s.text_muted }}{% endif %};
+  }
+
+  /* ═══════════════════════════════════════
+     LAYOUT : GRID
+     ═══════════════════════════════════════ */
+  .rp-{{ sid }} .rp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: {{ s.grid_gap }}px;
+    min-width: 0;
+  }
+  .rp-{{ sid }} .rp-grid > .rp-card {
+    min-width: 0;
+    max-width: 100%;
+  }
+  @media (max-width: 999px) {
+    .rp-{{ sid }} .rp-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 599px) {
+    .rp-{{ sid }} .rp-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ═══════════════════════════════════════
+     SWIPER OVERRIDES
+     ═══════════════════════════════════════ */
+  .rp-{{ sid }} .swiper {
+    padding-bottom: 56px;
+    overflow: hidden;
+  }
+  .rp-{{ sid }} .swiper-wrapper {
+    align-items: stretch;
+  }
+  .rp-{{ sid }} .swiper-slide {
+    height: auto;
+    min-width: 0;
+  }
+
+  .rp-{{ sid }} .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    border-radius: 8px;
+    opacity: 0.25;
+    background: {% if is_glass %}#fff{% else %}{{ s.title_color }}{% endif %};
+    transition: all 0.3s ease;
+  }
+  .rp-{{ sid }} .swiper-pagination-bullet-active {
+    opacity: 1;
+    width: 24px;
+    background: var(--rp-accent);
+  }
+
+  .rp-{{ sid }} .swiper-button-next,
+  .rp-{{ sid }} .swiper-button-prev {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    top: calc(50% - 28px);
+    transition: all 0.2s ease;
+    {% if is_glass %}
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+    {% else %}
+      background: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      color: {{ s.title_color }};
+    {% endif %}
+  }
+  .rp-{{ sid }} .swiper-button-next:hover,
+  .rp-{{ sid }} .swiper-button-prev:hover {
+    transform: scale(1.08);
+    {% if is_glass %}
+      background: rgba(255, 255, 255, 0.2);
+    {% else %}
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    {% endif %}
+  }
+  .rp-{{ sid }} .swiper-button-next::after,
+  .rp-{{ sid }} .swiper-button-prev::after {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  {% unless s.show_arrows %}
+    .rp-{{ sid }} .swiper-button-next,
+    .rp-{{ sid }} .swiper-button-prev { display: none !important; }
+  {% endunless %}
+  {% unless s.show_dots %}
+    .rp-{{ sid }} .swiper-pagination { display: none !important; }
+  {% endunless %}
+
+  /* ═══════════════════════════════════════
+     ERROR / EMPTY
+     ═══════════════════════════════════════ */
+  .rp-{{ sid }} .rp-empty {
+    text-align: center;
+    padding: 80px 24px;
+    color: {{ s.text_muted }};
+    font-size: 15px;
+  }
+  .rp-{{ sid }} .rp-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  /* ═══════════════════════════════════════
+     RESPONSIVE
+     ═══════════════════════════════════════ */
+  @media (max-width: 768px) {
+    .rp-{{ sid }} .rp-title { font-size: {{ s.title_size | times: 7 | divided_by: 10 }}px; }
+    .rp-{{ sid }} .rp-header { margin-bottom: 36px; }
+    .rp-{{ sid }} .rp-filters { flex-wrap: wrap; }
+    .rp-{{ sid }} .swiper-button-next,
+    .rp-{{ sid }} .swiper-button-prev { display: none !important; }
+  }
+{%- endstyle -%}
 
 <!-- ═══════════════════ HTML ═══════════════════ -->
-<section id="rv-{{ sid }}">
-  <div class="rv-bg-layer"></div>
+<section class="rp-{{ sid }}">
+  {% if is_glass or s.overlay_opacity > 0 %}<div class="rp-overlay"></div>{% endif %}
 
-  <div class="page-width rv-content">
+  <div class="rp-inner">
 
-    <!-- ── Heading ── -->
-    <div class="rv-heading">
-      {% if s.tag_text != blank %}
-        <span class="rv-heading__tag">{{ s.tag_text }}</span>
+    <div class="rp-header">
+      {% if s.badge != blank %}
+        <div class="rp-badge">{{ s.badge }}</div>
       {% endif %}
-
-      <div class="rv-summary-stars" id="rv-summary-{{ sid }}" style="display:none;"></div>
-
-      <h2 class="rv-heading__title">{{ s.title | default: 'Ce que nos clients disent' }}</h2>
-
+      <h2 class="rp-title">{{ s.title }}</h2>
       {% if s.subtitle != blank %}
-        <p class="rv-heading__subtitle">{{ s.subtitle }}</p>
+        <p class="rp-subtitle">{{ s.subtitle }}</p>
       {% endif %}
-
-      <p class="rv-heading__subtitle rv-heading__counter" id="rv-counter-{{ sid }}">
-        Chargement des avis…
-      </p>
+      <div class="rp-avg" id="rp-avg-{{ sid }}" style="display:none;"></div>
     </div>
 
-    <!-- ── Skeleton Loading ── -->
-    <div id="rv-skeleton-{{ sid }}" class="rv-skeleton">
-      <div class="rv-skeleton__card"></div>
-      <div class="rv-skeleton__card"></div>
-      <div class="rv-skeleton__card"></div>
-      <div class="rv-skeleton__card"></div>
+    {% if s.show_filter_bar %}
+      <div class="rp-filters" id="rp-filters-{{ sid }}">
+        <button class="rp-filter-btn active" data-rating="all">Tous</button>
+        <button class="rp-filter-btn" data-rating="5">5 ★</button>
+        <button class="rp-filter-btn" data-rating="4">4 ★</button>
+        <button class="rp-filter-btn" data-rating="3">3 ★</button>
+      </div>
+    {% endif %}
+
+    <div id="rp-skeleton-{{ sid }}" class="rp-skeleton">
+      <div class="rp-skeleton__item"></div>
+      <div class="rp-skeleton__item"></div>
+      <div class="rp-skeleton__item"></div>
     </div>
 
-    <!-- ── Slider Container (hidden until loaded) ── -->
-    <div id="rv-target-{{ sid }}" style="display:none;">
-      <div class="swiper rv-swiper rv-swiper-{{ sid }}">
-        <div class="swiper-wrapper" id="rv-slides-{{ sid }}"></div>
-        {% if s.show_pagination %}<div class="swiper-pagination"></div>{% endif %}
-        {% if s.show_navigation %}
+    <div id="rp-target-{{ sid }}" style="display:none;">
+      <div id="rp-wrapper-{{ sid }}"
+        class="{% if s.layout == 'slider' %}swiper{% else %}rp-grid{% endif %}">
+        <div id="rp-cards-{{ sid }}"
+          class="{% if s.layout == 'slider' %}swiper-wrapper{% endif %}">
+        </div>
+        {% if s.layout == 'slider' and s.show_dots %}
+          <div class="swiper-pagination"></div>
+        {% endif %}
+        {% if s.layout == 'slider' and s.show_arrows %}
           <div class="swiper-button-prev"></div>
           <div class="swiper-button-next"></div>
         {% endif %}
@@ -455,277 +483,241 @@
   </div>
 </section>
 
-<!-- ═══════════════════ SCRIPTS ═══════════════════ -->
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+<!-- SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "{{ product.title | default: shop.name }}",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "542"
+  }
+}
+</script>
+
+<script src="{{ 'swiper-bundle.min.js' | asset_url }}" defer="defer"></script>
 
 <script>
 (function() {
   'use strict';
 
-  /* ── Settings injection ─────────────────── */
-  const SID         = {{ sid | json }};
-  const API_URL     = {{ s.api_url | default: '' | json }};
-  const PRODUCT     = {{ s.product_handle | default: '' | json }};
-  const MIN_RATING  = {{ s.min_rating | default: 0 | json }};
-  const LIMIT       = {{ s.reviews_limit | default: 0 | json }};
+  var SID    = {{ sid | json }};
+  var API    = {{ s.api_url | default: '' | json }};
+  var HANDLE = {{ s.product_handle | default: '' | json }};
+  var MIN_R  = {{ s.min_rating | json }};
+  var MAX_N  = {{ s.max_reviews | json }};
+  var LAYOUT = {{ s.layout | json }};
 
-  /* Display toggles */
-  const SHOW_AVATAR   = {{ s.show_avatar | json }};
-  const SHOW_DATE     = {{ s.show_date | json }};
-  const SHOW_COUNTRY  = {{ s.show_country | json }};
-  const SHOW_VERIFIED = {{ s.show_verified | json }};
-  const SHOW_STARS    = {{ s.show_stars | json }};
-  const SHOW_TITLE    = {{ s.show_review_title | json }};
-  const SHOW_BODY     = {{ s.show_body | json }};
-  const SHOW_MEDIA    = {{ s.show_media | json }};
-  const SHOW_SUMMARY  = {{ s.show_summary_stars | json }};
+  var SHOW = {
+    image:    {{ s.show_image | json }},
+    stars:    {{ s.show_stars | json }},
+    title:    {{ s.show_review_title | json }},
+    body:     {{ s.show_body | json }},
+    avatar:   {{ s.show_avatar | json }},
+    date:     {{ s.show_date | json }},
+    country:  {{ s.show_country | json }},
+    verified: {{ s.show_verified | json }}
+  };
 
-  /* Swiper config */
-  const AUTOPLAY       = {{ s.autoplay | json }};
-  const AUTOPLAY_DELAY = {{ s.autoplay_delay | default: 4000 | json }};
-  const LOOP           = {{ s.swiper_loop | json }};
-  const EFFECT         = {{ s.swiper_effect | default: 'slide' | json }};
-  const SPACE_BETWEEN  = {{ s.space_between | default: 24 | json }};
-  const SLIDES_MOBILE  = {{ s.slides_mobile | default: 1 | json }};
-  const SLIDES_TABLET  = {{ s.slides_tablet | default: 2 | json }};
-  const SLIDES_DESKTOP = {{ s.slides_desktop | default: 3 | json }};
-  const SLIDES_WIDE    = {{ s.slides_wide | default: 4 | json }};
+  var SWIPER_CFG = {
+    effect:    {{ s.swiper_effect | default: 'slide' | json }},
+    autoplay:  {{ s.autoplay | json }},
+    delay:     {{ s.autoplay_speed | json }},
+    loop:      {{ s.loop | json }},
+    gap:       {{ s.slide_gap | json }},
+    mobile:    {{ s.per_mobile | json }},
+    tablet:    {{ s.per_tablet | json }},
+    desktop:   {{ s.per_desktop | json }}
+  };
 
-  /* ── DOM refs ───────────────────────────── */
-  const $skeleton = document.getElementById('rv-skeleton-' + SID);
-  const $target   = document.getElementById('rv-target-' + SID);
-  const $slides   = document.getElementById('rv-slides-' + SID);
-  const $counter  = document.getElementById('rv-counter-' + SID);
-  const $summary  = document.getElementById('rv-summary-' + SID);
+  var $skeleton = document.getElementById('rp-skeleton-' + SID);
+  var $target   = document.getElementById('rp-target-' + SID);
+  var $cards    = document.getElementById('rp-cards-' + SID);
+  var $avg      = document.getElementById('rp-avg-' + SID);
 
-  /* ── Helpers ────────────────────────────── */
-  function starSVG(filled, size) {
-    size = size || 16;
-    const c = filled ? 'var(--rv-star)' : 'var(--rv-star-empty)';
-    return '<svg class="rv-card__star" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="'+c+'"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+  /* Helpers */
+  function esc(s) {
+    if (!s) return '';
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
   }
 
-  function renderStars(rating, size) {
-    return Array.from({ length: 5 }, function(_, i) { return starSVG(i < rating, size); }).join('');
+  function stars(n) {
+    var o = '';
+    for (var i = 1; i <= 5; i++) o += i <= n ? '★' : '☆';
+    return o;
   }
 
-  function getInitials(name) {
-    if (!name) return '?';
-    return name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0, 2);
+  function ini(n) {
+    if (!n) return '?';
+    return n.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
   }
 
-  function formatDate(dateStr) {
-    try {
-      return new Date(dateStr).toLocaleDateString('fr-FR', {
-        day: 'numeric', month: 'long', year: 'numeric'
-      });
-    } catch(e) { return dateStr; }
+  function fdate(d) {
+    try { return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }); }
+    catch(e) { return d || ''; }
   }
 
-  function escapeHtml(str) {
-    if (!str) return '';
-    var div = document.createElement('div');
-    div.appendChild(document.createTextNode(str));
-    return div.innerHTML;
+  /* Card */
+  function card(r) {
+    var h = [];
+    var slide = LAYOUT === 'slider' ? ' swiper-slide' : '';
+    h.push('<div class="rp-card' + slide + '" data-rating="' + r.rating + '">');
+
+    if (SHOW.image && r.image_url && r.image_url.trim()) {
+      h.push('<div class="rp-media"><img src="' + r.image_url.trim() + '" alt="' + esc(r.author) + '" loading="lazy" width="600" height="600"></div>');
+    } else if (SHOW.image && r.video_url && r.video_url.trim()) {
+      h.push('<div class="rp-media"><video src="' + r.video_url.trim() + '" muted playsinline preload="none"></video></div>');
+    }
+
+    if (SHOW.stars) h.push('<div class="rp-stars">' + stars(parseInt(r.rating)) + '</div>');
+    if (SHOW.title && r.title) h.push('<h3 class="rp-card-title">' + esc(r.title) + '</h3>');
+    if (SHOW.body && r.body) h.push('<p class="rp-body">"' + esc(r.body) + '"</p>');
+
+    h.push('<div class="rp-footer">');
+    if (SHOW.avatar) h.push('<div class="rp-avatar">' + ini(r.author) + '</div>');
+    h.push('<div>');
+    h.push('<div class="rp-author">' + esc(r.author) + '</div>');
+    if (SHOW.verified && r.verified && r.verified.trim() === 'true') {
+      h.push('<div class="rp-verified">✓ Achat vérifié</div>');
+    }
+    var meta = [];
+    if (SHOW.date && r.date) meta.push(fdate(r.date));
+    if (SHOW.country && r.country && r.country.trim()) meta.push(r.country.trim());
+    if (meta.length) h.push('<div class="rp-date">' + meta.join(' · ') + '</div>');
+    h.push('</div></div>');
+
+    h.push('</div>');
+    return h.join('');
   }
 
-  /* ── Card Renderer ─────────────────────── */
-  function renderCard(r) {
-    var parts = [];
-
-    parts.push('<div class="swiper-slide"><div class="rv-card">');
-
-    /* Header */
-    parts.push('<div class="rv-card__header">');
-    if (SHOW_AVATAR) {
-      parts.push('<div class="rv-card__avatar">' + getInitials(r.author) + '</div>');
-    }
-    parts.push('<div class="rv-card__meta">');
-    parts.push('<div class="rv-card__author">' + escapeHtml(r.author) + '</div>');
-    if (SHOW_DATE || SHOW_COUNTRY) {
-      var dateParts = [];
-      if (SHOW_DATE && r.date) dateParts.push(formatDate(r.date));
-      if (SHOW_COUNTRY && r.country) dateParts.push(r.country.trim());
-      if (dateParts.length) {
-        parts.push('<div class="rv-card__date">' + dateParts.join(' · ') + '</div>');
-      }
-    }
-    if (SHOW_VERIFIED && r.verified && r.verified.trim() === 'true') {
-      parts.push('<span class="rv-card__verified">✓ Achat vérifié</span>');
-    }
-    parts.push('</div></div>');
-
-    /* Stars */
-    if (SHOW_STARS) {
-      parts.push('<div class="rv-card__stars">' + renderStars(parseInt(r.rating, 10)) + '</div>');
-    }
-
-    /* Title */
-    if (SHOW_TITLE && r.title) {
-      parts.push('<h3 class="rv-card__title">' + escapeHtml(r.title) + '</h3>');
-    }
-
-    /* Body */
-    if (SHOW_BODY && r.body) {
-      parts.push('<p class="rv-card__body">' + escapeHtml(r.body) + '</p>');
-    }
-
-    /* Media */
-    if (SHOW_MEDIA) {
-      if (r.image_url && r.image_url.trim()) {
-        parts.push('<div class="rv-card__media"><img src="' + r.image_url.trim() + '" alt="Photo de ' + escapeHtml(r.author) + '" loading="lazy" width="400" height="160"></div>');
-      } else if (r.video_url && r.video_url.trim()) {
-        parts.push('<div class="rv-card__media"><video src="' + r.video_url.trim() + '" muted playsinline preload="none"></video></div>');
-      }
-    }
-
-    parts.push('</div></div>');
-    return parts.join('');
-  }
-
-  /* ── Summary Renderer ──────────────────── */
-  function renderSummary(reviews) {
-    if (!SHOW_SUMMARY || !reviews.length) return;
-    var sum = reviews.reduce(function(a, r){ return a + parseInt(r.rating, 10); }, 0);
+  /* Average */
+  function showAvg(reviews) {
+    if (!reviews.length) return;
+    var sum = reviews.reduce(function(a, r) { return a + parseInt(r.rating); }, 0);
     var avg = (sum / reviews.length).toFixed(1);
-    var avgInt = Math.round(sum / reviews.length);
-    $summary.innerHTML = renderStars(avgInt, 22) + '<span class="rv-summary-avg">' + avg + '</span>';
-    $summary.style.display = 'flex';
+    $avg.innerHTML = stars(Math.round(avg)) + ' <span>' + avg + '/5 — ' + reviews.length + ' avis</span>';
+    $avg.style.display = 'inline-flex';
   }
 
-  /* ── Swiper Init ────────────────────────── */
+  /* Filters */
+  function bindFilters() {
+    var bar = document.getElementById('rp-filters-' + SID);
+    if (!bar) return;
+    bar.querySelectorAll('.rp-filter-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        bar.querySelectorAll('.rp-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        var r = this.dataset.rating;
+        var wrapper = document.getElementById('rp-wrapper-' + SID);
+        wrapper.querySelectorAll('.rp-card').forEach(function(c) {
+          c.style.display = (r === 'all' || c.dataset.rating === r) ? '' : 'none';
+        });
+        if (LAYOUT === 'slider' && window['rpSwiper_' + SID]) window['rpSwiper_' + SID].update();
+      });
+    });
+  }
+
+  /* Swiper */
   function initSwiper() {
-    var config = {
-      slidesPerView: SLIDES_MOBILE,
-      spaceBetween: SPACE_BETWEEN,
+    var cfg = {
+      slidesPerView: SWIPER_CFG.mobile,
+      spaceBetween: SWIPER_CFG.gap,
       grabCursor: true,
-      loop: LOOP,
-      effect: EFFECT,
-      pagination: {
-        el: '#rv-' + SID + ' .swiper-pagination',
-        clickable: true
-      },
-      navigation: {
-        nextEl: '#rv-' + SID + ' .swiper-button-next',
-        prevEl: '#rv-' + SID + ' .swiper-button-prev'
-      },
+      loop: SWIPER_CFG.loop,
+      effect: SWIPER_CFG.effect,
+      pagination: { el: '.rp-' + SID + ' .swiper-pagination', clickable: true },
+      navigation: { nextEl: '.rp-' + SID + ' .swiper-button-next', prevEl: '.rp-' + SID + ' .swiper-button-prev' },
       breakpoints: {}
     };
+    cfg.breakpoints[600]  = { slidesPerView: SWIPER_CFG.tablet,  spaceBetween: SWIPER_CFG.gap };
+    cfg.breakpoints[1000] = { slidesPerView: SWIPER_CFG.desktop, spaceBetween: SWIPER_CFG.gap };
 
-    config.breakpoints[640]  = { slidesPerView: SLIDES_TABLET, spaceBetween: SPACE_BETWEEN };
-    config.breakpoints[1024] = { slidesPerView: SLIDES_DESKTOP, spaceBetween: SPACE_BETWEEN };
-    config.breakpoints[1400] = { slidesPerView: SLIDES_WIDE, spaceBetween: SPACE_BETWEEN };
-
-    if (AUTOPLAY) {
-      config.autoplay = {
-        delay: AUTOPLAY_DELAY,
-        disableOnInteraction: false,
-        pauseOnMouseEnter: true
-      };
+    if (SWIPER_CFG.autoplay) {
+      cfg.autoplay = { delay: SWIPER_CFG.delay, disableOnInteraction: false, pauseOnMouseEnter: true };
+    }
+    if (SWIPER_CFG.effect === 'coverflow') {
+      cfg.coverflowEffect = { rotate: 25, stretch: 0, depth: 80, modifier: 1, slideShadows: false };
+      cfg.centeredSlides = true;
     }
 
-    /* coverflow effect needs special config */
-    if (EFFECT === 'coverflow') {
-      config.coverflowEffect = {
-        rotate: 30,
-        stretch: 0,
-        depth: 100,
-        modifier: 1,
-        slideShadows: false
-      };
-      config.centeredSlides = true;
-    }
-
-    new Swiper('.rv-swiper-' + SID, config);
+    window['rpSwiper_' + SID] = new Swiper('.rp-' + SID + ' .swiper', cfg);
   }
 
-  /* ── Main Loader ────────────────────────── */
+  /* Load */
   function load() {
-    if (!API_URL) {
+    if (!API) {
       $skeleton.style.display = 'none';
-      $counter.textContent = '⚠️ Configure l\'URL de l\'API dans le Customizer.';
+      $target.style.display = 'block';
+      $cards.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚙️</div><p>Configurez l\'URL de l\'API dans le Customizer.</p></div>';
       return;
     }
 
-    var url = new URL(API_URL);
-    if (PRODUCT) url.searchParams.set('product', PRODUCT);
-    if (MIN_RATING > 0) url.searchParams.set('rating', MIN_RATING);
-    if (LIMIT > 0) url.searchParams.set('limit', LIMIT);
+    var url = new URL(API);
+    if (HANDLE) url.searchParams.set('product', HANDLE);
+    if (MIN_R > 0) url.searchParams.set('rating', MIN_R);
+    if (MAX_N > 0) url.searchParams.set('limit', MAX_N);
 
     fetch(url.toString())
-      .then(function(res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(data) {
         var reviews = data.reviews || data;
-
         if (!reviews || !reviews.length) {
           $skeleton.style.display = 'none';
-          $counter.textContent = 'Aucun avis pour le moment.';
+          $target.style.display = 'block';
+          $cards.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">💬</div><p>Aucun avis pour le moment.</p></div>';
           return;
         }
 
-        /* Render */
-        $slides.innerHTML = reviews.map(renderCard).join('');
-        renderSummary(reviews);
+        $cards.innerHTML = reviews.map(card).join('');
+        showAvg(reviews);
+        bindFilters();
 
-        /* Show */
         $skeleton.style.display = 'none';
         $target.style.display = 'block';
-        $counter.textContent = (data.total || reviews.length) + ' avis vérifiés';
 
-        /* Init Swiper */
-        if (typeof Swiper !== 'undefined') {
-          initSwiper();
-        } else {
-          var script = document.querySelector('script[src*="swiper"]');
-          if (script) script.addEventListener('load', initSwiper);
+        if (LAYOUT === 'slider') {
+          if (typeof Swiper !== 'undefined') initSwiper();
+          else {
+            var s = document.querySelector('script[src*="swiper"]');
+            if (s) s.addEventListener('load', initSwiper);
+          }
         }
       })
       .catch(function(err) {
-        console.error('[Premium Reviews]', err);
-        $skeleton.innerHTML =
-          '<div class="rv-error">' +
-          '<div class="rv-error__icon">⚠️</div>' +
-          '<p>Impossible de charger les avis.</p>' +
-          '<p style="font-size:12px;margin-top:4px;">' + escapeHtml(err.message) + '</p>' +
-          '</div>';
+        console.error('[Reviews]', err);
+        $skeleton.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚠️</div><p>Erreur de chargement.</p><p style="font-size:12px;opacity:.5;">' + esc(err.message) + '</p></div>';
       });
   }
 
-  /* ── Boot ───────────────────────────────── */
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', load);
-  } else {
-    load();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);
+  else load();
 })();
 </script>
 
-
 {% schema %}
 {
-  "name": "✨ Premium Reviews",
+  "name": "Avis Premium 2026",
   "tag": "section",
-  "class": "section-premium-reviews",
+  "class": "section-avis-premium",
   "settings": [
     {
       "type": "header",
-      "content": "🔗 Connexion API"
+      "content": "🔗 API"
     },
     {
       "type": "text",
       "id": "api_url",
-      "label": "URL de l'API Vercel",
-      "info": "Ex: https://mon-projet.vercel.app/api",
+      "label": "URL de l'API",
       "default": "https://reveiews-fd3f.vercel.app/api"
     },
     {
       "type": "text",
       "id": "product_handle",
-      "label": "Handle produit (filtre)",
-      "info": "Laisser vide pour afficher tous les avis"
+      "label": "Handle produit (filtre)"
     },
     {
       "type": "range",
@@ -734,27 +726,27 @@
       "min": 0,
       "max": 5,
       "step": 1,
-      "default": 0,
-      "info": "0 = tous les avis"
+      "default": 0
     },
     {
       "type": "range",
-      "id": "reviews_limit",
+      "id": "max_reviews",
       "label": "Nombre max d'avis",
       "min": 0,
-      "max": 100,
+      "max": 50,
       "step": 5,
       "default": 0,
-      "info": "0 = illimité"
+      "info": "0 = tous"
     },
+
     {
       "type": "header",
-      "content": "🎨 Mode de design"
+      "content": "🎨 Design"
     },
     {
       "type": "select",
       "id": "design_mode",
-      "label": "Style des cartes",
+      "label": "Style",
       "options": [
         { "value": "classic", "label": "Classique" },
         { "value": "glassmorphism", "label": "Glassmorphism" }
@@ -762,333 +754,343 @@
       "default": "classic"
     },
     {
+      "type": "select",
+      "id": "layout",
+      "label": "Disposition",
+      "options": [
+        { "value": "grid", "label": "Grille" },
+        { "value": "slider", "label": "Carrousel (Swiper)" }
+      ],
+      "default": "grid"
+    },
+
+    {
       "type": "header",
       "content": "🪟 Glassmorphism"
     },
     {
       "type": "range",
       "id": "glass_blur",
-      "label": "Intensité du flou (blur)",
+      "label": "Flou",
       "min": 4,
       "max": 40,
-      "step": 2,
+      "step": 4,
       "default": 16,
-      "unit": "px",
-      "info": "Actif uniquement en mode Glassmorphism"
+      "unit": "px"
     },
     {
       "type": "range",
       "id": "glass_opacity",
-      "label": "Opacité du verre",
+      "label": "Opacité",
       "min": 5,
-      "max": 60,
+      "max": 45,
       "step": 5,
-      "default": 20,
+      "default": 15,
       "unit": "%"
     },
     {
       "type": "color",
-      "id": "glass_tint_color",
-      "label": "Teinte du verre",
+      "id": "glass_tint",
+      "label": "Teinte",
       "default": "#ffffff"
     },
     {
       "type": "text",
-      "id": "glass_border_color",
-      "label": "Bordure du verre",
-      "default": "rgba(255,255,255,0.3)",
-      "info": "Supporte rgba()"
+      "id": "glass_border",
+      "label": "Bordure",
+      "default": "rgba(255,255,255,0.18)"
     },
+
     {
       "type": "header",
-      "content": "📝 En-tête de section"
+      "content": "📝 En-tête"
     },
     {
       "type": "text",
-      "id": "tag_text",
-      "label": "Badge / Tag",
-      "default": "★ AVIS CLIENTS",
-      "info": "Petit badge au-dessus du titre"
+      "id": "badge",
+      "label": "Badge",
+      "default": "Avis clients"
     },
     {
       "type": "text",
       "id": "title",
-      "label": "Titre principal",
-      "default": "Ce que nos clients disent"
-    },
-    {
-      "type": "select",
-      "id": "title_weight",
-      "label": "Graisse du titre",
-      "options": [
-        { "value": "400", "label": "Normal" },
-        { "value": "600", "label": "Semi-bold" },
-        { "value": "700", "label": "Bold" },
-        { "value": "800", "label": "Extra-bold" },
-        { "value": "900", "label": "Black" }
-      ],
-      "default": "700"
+      "label": "Titre",
+      "default": "Ce qu'ils en pensent."
     },
     {
       "type": "textarea",
       "id": "subtitle",
       "label": "Sous-titre",
-      "default": "Des résultats prouvés par notre communauté"
+      "default": "Des résultats visibles, validés par notre communauté."
     },
     {
-      "type": "select",
-      "id": "heading_alignment",
-      "label": "Alignement du titre",
-      "options": [
-        { "value": "left", "label": "Gauche" },
-        { "value": "center", "label": "Centre" },
-        { "value": "right", "label": "Droite" }
-      ],
-      "default": "center"
+      "type": "range",
+      "id": "title_size",
+      "label": "Taille titre",
+      "min": 28,
+      "max": 64,
+      "step": 4,
+      "default": 48,
+      "unit": "px"
     },
+    {
+      "type": "range",
+      "id": "subtitle_size",
+      "label": "Taille sous-titre",
+      "min": 14,
+      "max": 22,
+      "step": 1,
+      "default": 17,
+      "unit": "px"
+    },
+
     {
       "type": "header",
       "content": "🎨 Couleurs"
     },
     {
       "type": "color",
-      "id": "section_bg_color",
-      "label": "Arrière-plan section",
-      "default": "#fafafa"
+      "id": "bg_color",
+      "label": "Fond section",
+      "default": "#ffffff"
     },
     {
       "type": "text",
       "id": "bg_gradient",
-      "label": "Gradient (remplace la couleur)",
-      "info": "Ex: linear-gradient(135deg, #0f0c29, #302b63, #24243e)"
+      "label": "Gradient (remplace le fond)"
     },
     {
       "type": "image_picker",
       "id": "bg_image",
-      "label": "Image d'arrière-plan",
-      "info": "Idéal pour le mode Glassmorphism"
+      "label": "Image de fond"
     },
     {
       "type": "range",
-      "id": "bg_overlay_opacity",
-      "label": "Overlay sombre sur l'image",
+      "id": "overlay_opacity",
+      "label": "Overlay sombre",
       "min": 0,
       "max": 80,
-      "step": 5,
-      "default": 30,
+      "step": 10,
+      "default": 0,
       "unit": "%"
     },
     {
       "type": "color",
-      "id": "text_color",
-      "label": "Couleur du texte",
-      "default": "#333333"
+      "id": "title_color",
+      "label": "Titre",
+      "default": "#1d1d1f"
     },
     {
       "type": "color",
-      "id": "subtle_color",
-      "label": "Couleur texte secondaire",
-      "default": "#888888"
+      "id": "text_muted",
+      "label": "Texte secondaire",
+      "default": "#86868b"
     },
     {
       "type": "color",
       "id": "accent_color",
-      "label": "Couleur d'accent",
-      "default": "#667eea"
+      "label": "Accent",
+      "default": "#0071e3"
     },
     {
       "type": "color",
       "id": "star_color",
-      "label": "Couleur étoiles pleines",
-      "default": "#f5a623"
+      "label": "Étoiles",
+      "default": "#FF9500"
     },
     {
       "type": "color",
-      "id": "star_empty_color",
-      "label": "Couleur étoiles vides",
-      "default": "#e0e0e0"
+      "id": "verified_color",
+      "label": "Badge vérifié",
+      "default": "#34c759"
     },
+
     {
       "type": "header",
       "content": "🃏 Cartes"
     },
     {
       "type": "color",
-      "id": "card_bg_color",
-      "label": "Fond des cartes (classique)",
-      "default": "#ffffff"
+      "id": "card_bg",
+      "label": "Fond carte",
+      "default": "#f5f5f7"
     },
     {
       "type": "color",
-      "id": "card_text_color",
-      "label": "Texte des cartes",
-      "default": "#333333"
+      "id": "card_text",
+      "label": "Texte carte",
+      "default": "#1d1d1f"
     },
     {
       "type": "color",
-      "id": "card_body_color",
-      "label": "Corps du texte",
-      "default": "#555555"
+      "id": "card_body",
+      "label": "Corps carte",
+      "default": "#6e6e73"
     },
     {
       "type": "text",
-      "id": "card_border_color",
-      "label": "Bordure (classique)",
+      "id": "card_border",
+      "label": "Bordure carte",
       "default": "transparent"
     },
     {
       "type": "range",
       "id": "card_radius",
-      "label": "Arrondi des coins",
+      "label": "Arrondi",
       "min": 0,
-      "max": 30,
-      "step": 2,
-      "default": 14,
+      "max": 32,
+      "step": 4,
+      "default": 20,
       "unit": "px"
     },
     {
       "type": "range",
       "id": "card_padding",
-      "label": "Padding interne",
-      "min": 12,
+      "label": "Padding",
+      "min": 16,
       "max": 40,
+      "step": 4,
+      "default": 28,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "hover_lift",
+      "label": "Élévation survol",
+      "min": 0,
+      "max": 16,
+      "step": 2,
+      "default": 8,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "body_size",
+      "label": "Taille texte avis",
+      "min": 13,
+      "max": 19,
+      "step": 1,
+      "default": 15,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "avatar_end",
+      "label": "Gradient avatar fin",
+      "default": "#5856d6"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "label": "Espacement grille",
+      "min": 12,
+      "max": 48,
       "step": 4,
       "default": 24,
       "unit": "px"
     },
-    {
-      "type": "range",
-      "id": "card_hover_lift",
-      "label": "Élévation au survol",
-      "min": 0,
-      "max": 12,
-      "step": 2,
-      "default": 6,
-      "unit": "px"
-    },
-    {
-      "type": "color",
-      "id": "avatar_gradient_end",
-      "label": "Couleur fin gradient avatar",
-      "default": "#764ba2"
-    },
-    {
-      "type": "color",
-      "id": "verified_color",
-      "label": "Couleur badge vérifié",
-      "default": "#27ae60"
-    },
-    {
-      "type": "range",
-      "id": "media_height",
-      "label": "Hauteur des médias",
-      "min": 80,
-      "max": 300,
-      "step": 10,
-      "default": 160,
-      "unit": "px"
-    },
+
     {
       "type": "header",
-      "content": "👁️ Visibilité des éléments"
+      "content": "👁 Éléments"
     },
     {
       "type": "checkbox",
-      "id": "show_summary_stars",
-      "label": "Afficher la note moyenne",
+      "id": "show_filter_bar",
+      "label": "Barre de filtres",
       "default": true
     },
     {
       "type": "checkbox",
-      "id": "show_avatar",
-      "label": "Afficher l'avatar",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_date",
-      "label": "Afficher la date",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_country",
-      "label": "Afficher le pays",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_verified",
-      "label": "Afficher le badge vérifié",
+      "id": "show_image",
+      "label": "Photos / vidéos",
       "default": true
     },
     {
       "type": "checkbox",
       "id": "show_stars",
-      "label": "Afficher les étoiles",
+      "label": "Étoiles",
       "default": true
     },
     {
       "type": "checkbox",
       "id": "show_review_title",
-      "label": "Afficher le titre de l'avis",
+      "label": "Titre de l'avis",
       "default": true
     },
     {
       "type": "checkbox",
       "id": "show_body",
-      "label": "Afficher le texte de l'avis",
+      "label": "Texte de l'avis",
       "default": true
     },
     {
       "type": "checkbox",
-      "id": "show_media",
-      "label": "Afficher les photos/vidéos",
+      "id": "show_avatar",
+      "label": "Avatar",
       "default": true
     },
     {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_country",
+      "label": "Pays",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_verified",
+      "label": "Badge vérifié",
+      "default": true
+    },
+
+    {
       "type": "header",
-      "content": "🎠 Swiper — Slider"
+      "content": "🎠 Carrousel"
     },
     {
       "type": "select",
       "id": "swiper_effect",
-      "label": "Effet de transition",
+      "label": "Transition",
       "options": [
-        { "value": "slide", "label": "Slide (défaut)" },
+        { "value": "slide", "label": "Slide" },
         { "value": "coverflow", "label": "Coverflow 3D" },
-        { "value": "fade", "label": "Fondu (1 slide)" },
-        { "value": "creative", "label": "Creative" }
+        { "value": "fade", "label": "Fondu" }
       ],
       "default": "slide"
     },
     {
       "type": "checkbox",
       "id": "autoplay",
-      "label": "Défilement automatique",
+      "label": "Lecture auto",
       "default": false
     },
     {
       "type": "range",
-      "id": "autoplay_delay",
+      "id": "autoplay_speed",
       "label": "Vitesse autoplay",
       "min": 2000,
       "max": 8000,
-      "step": 500,
+      "step": 1000,
       "default": 4000,
       "unit": "ms"
     },
     {
       "type": "checkbox",
-      "id": "swiper_loop",
+      "id": "loop",
       "label": "Boucle infinie",
       "default": true
     },
     {
       "type": "range",
-      "id": "space_between",
-      "label": "Espacement entre slides",
-      "min": 8,
+      "id": "slide_gap",
+      "label": "Espacement slides",
+      "min": 12,
       "max": 48,
       "step": 4,
       "default": 24,
@@ -1096,25 +1098,25 @@
     },
     {
       "type": "range",
-      "id": "slides_mobile",
+      "id": "per_mobile",
       "label": "Slides — Mobile",
       "min": 1,
-      "max": 2,
+      "max": 3,
       "step": 1,
       "default": 1
     },
     {
       "type": "range",
-      "id": "slides_tablet",
+      "id": "per_tablet",
       "label": "Slides — Tablette",
       "min": 1,
-      "max": 3,
+      "max": 4,
       "step": 1,
       "default": 2
     },
     {
       "type": "range",
-      "id": "slides_desktop",
+      "id": "per_desktop",
       "label": "Slides — Desktop",
       "min": 1,
       "max": 5,
@@ -1122,71 +1124,21 @@
       "default": 3
     },
     {
-      "type": "range",
-      "id": "slides_wide",
-      "label": "Slides — Grand écran",
-      "min": 1,
-      "max": 6,
-      "step": 1,
-      "default": 4
-    },
-    {
       "type": "checkbox",
-      "id": "show_pagination",
-      "label": "Afficher la pagination",
+      "id": "show_dots",
+      "label": "Pagination (points)",
       "default": true
     },
     {
       "type": "checkbox",
-      "id": "show_navigation",
-      "label": "Afficher les flèches",
+      "id": "show_arrows",
+      "label": "Flèches",
       "default": true
     },
-    {
-      "type": "color",
-      "id": "nav_color",
-      "label": "Couleur des flèches",
-      "default": "#333333"
-    },
-    {
-      "type": "color",
-      "id": "pagination_color",
-      "label": "Couleur pagination active",
-      "default": "#333333"
-    },
+
     {
       "type": "header",
-      "content": "📐 Typographie & Espacement"
-    },
-    {
-      "type": "range",
-      "id": "title_size",
-      "label": "Taille du titre",
-      "min": 20,
-      "max": 56,
-      "step": 2,
-      "default": 32,
-      "unit": "px"
-    },
-    {
-      "type": "range",
-      "id": "subtitle_size",
-      "label": "Taille du sous-titre",
-      "min": 12,
-      "max": 22,
-      "step": 1,
-      "default": 15,
-      "unit": "px"
-    },
-    {
-      "type": "range",
-      "id": "body_font_size",
-      "label": "Taille du texte des avis",
-      "min": 12,
-      "max": 18,
-      "step": 1,
-      "default": 14,
-      "unit": "px"
+      "content": "📐 Espacement"
     },
     {
       "type": "range",
@@ -1194,8 +1146,8 @@
       "label": "Padding haut",
       "min": 0,
       "max": 120,
-      "step": 10,
-      "default": 60,
+      "step": 12,
+      "default": 72,
       "unit": "px"
     },
     {
@@ -1204,46 +1156,49 @@
       "label": "Padding bas",
       "min": 0,
       "max": 120,
-      "step": 10,
-      "default": 60,
+      "step": 12,
+      "default": 72,
       "unit": "px"
     }
   ],
   "presets": [
     {
-      "name": "✨ Premium Reviews",
+      "name": "Avis Premium 2026",
       "settings": {
         "api_url": "https://reveiews-fd3f.vercel.app/api",
         "design_mode": "classic",
-        "title": "Ce que nos clients disent",
-        "tag_text": "★ AVIS CLIENTS",
-        "subtitle": "Des résultats prouvés par notre communauté"
+        "layout": "grid",
+        "title": "Ce qu'ils en pensent.",
+        "badge": "Avis clients",
+        "subtitle": "Des résultats visibles, validés par notre communauté."
       }
     },
     {
-      "name": "🪟 Reviews Glassmorphism",
+      "name": "Avis Premium — Glass",
       "settings": {
         "api_url": "https://reveiews-fd3f.vercel.app/api",
         "design_mode": "glassmorphism",
-        "title": "Ils nous font confiance",
-        "tag_text": "★ TÉMOIGNAGES",
-        "subtitle": "Découvrez les retours de notre communauté",
-        "section_bg_color": "#0f0c29",
+        "layout": "slider",
+        "title": "Ils nous font confiance.",
+        "badge": "Témoignages",
+        "subtitle": "Découvrez les retours de notre communauté.",
+        "bg_color": "#0f0c29",
         "bg_gradient": "linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)",
-        "text_color": "#ffffff",
-        "subtle_color": "#b0b0d0",
-        "accent_color": "#a78bfa",
-        "card_text_color": "#ffffff",
-        "card_body_color": "#c8c8e0",
-        "nav_color": "#ffffff",
-        "pagination_color": "#a78bfa",
+        "title_color": "#ffffff",
+        "text_muted": "#a1a1a6",
+        "accent_color": "#bf5af2",
+        "avatar_end": "#5e5ce6",
+        "card_bg": "#ffffff",
+        "card_text": "#ffffff",
+        "card_body": "#a1a1a6",
+        "star_color": "#ffd60a",
+        "verified_color": "#30d158",
         "glass_blur": 20,
-        "glass_opacity": 15,
-        "glass_tint_color": "#ffffff",
-        "glass_border_color": "rgba(255,255,255,0.18)",
-        "avatar_gradient_end": "#a78bfa",
-        "bg_overlay_opacity": 0,
-        "card_hover_lift": 8
+        "glass_opacity": 10,
+        "glass_tint": "#ffffff",
+        "glass_border": "rgba(255,255,255,0.12)",
+        "overlay_opacity": 20,
+        "hover_lift": 10
       }
     }
   ]

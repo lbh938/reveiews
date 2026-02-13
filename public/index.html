@@ -36,6 +36,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         Aperçu Swiper
       </a>
+      <a href="#" class="sidebar__link" data-page="import">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import CSV
+      </a>
       <a href="#" class="sidebar__link" data-page="api">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
         Documentation API
@@ -200,6 +204,123 @@
             <div class="swiper-pagination"></div>
             <div class="swiper-button-prev"></div>
             <div class="swiper-button-next"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── PAGE: IMPORT CSV ─── -->
+    <section class="page" id="page-import">
+      <div class="page__header">
+        <h1 class="page__title">Import CSV</h1>
+        <p class="page__desc">Importez vos avis depuis AliExpress, Judge.me, Loox ou tout autre format CSV</p>
+      </div>
+
+      <!-- Step 1: Upload -->
+      <div class="import-steps">
+        <div class="import-step active" id="importStep1">
+          <div class="import-step__number">1</div>
+          <div class="import-step__content">
+            <h3>Charger le fichier CSV</h3>
+
+            <div class="import-dropzone" id="importDropzone">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <p><strong>Glissez votre fichier CSV ici</strong></p>
+              <p style="font-size:13px;color:var(--text-secondary);">ou cliquez pour parcourir</p>
+              <input type="file" id="importFile" accept=".csv,.txt" style="display:none;">
+            </div>
+
+            <div class="import-formats">
+              <span class="import-format-tag">✅ AliExpress</span>
+              <span class="import-format-tag">✅ Judge.me</span>
+              <span class="import-format-tag">✅ Loox</span>
+              <span class="import-format-tag">✅ Format Review Engine</span>
+              <span class="import-format-tag">✅ CSV générique</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Mapping -->
+        <div class="import-step" id="importStep2">
+          <div class="import-step__number">2</div>
+          <div class="import-step__content">
+            <h3>Mapping des colonnes</h3>
+            <p class="import-step__desc" id="importFormatDetected"></p>
+
+            <div class="import-config">
+              <div class="import-config__row">
+                <label>Handle produit Shopify</label>
+                <input type="text" id="importProductHandle" placeholder="ex: pommeau-douche-premium" class="import-input">
+              </div>
+              <div class="import-config__row">
+                <label>ID produit (optionnel)</label>
+                <input type="text" id="importProductId" placeholder="ex: 1001" class="import-input">
+              </div>
+              <div class="import-config__row">
+                <label>Langue des avis</label>
+                <select id="importLang" class="import-input">
+                  <option value="translation">Traduction FR (si disponible)</option>
+                  <option value="original">Texte original</option>
+                </select>
+              </div>
+              <div class="import-config__row">
+                <label>Fusionner avec les avis existants ?</label>
+                <select id="importMerge" class="import-input">
+                  <option value="replace">Remplacer tout</option>
+                  <option value="merge">Fusionner (ajouter)</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="import-btn" id="importConvertBtn" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Convertir les avis
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3: Preview + Download -->
+        <div class="import-step" id="importStep3">
+          <div class="import-step__number">3</div>
+          <div class="import-step__content">
+            <h3>Aperçu & Téléchargement</h3>
+            <div class="import-stats" id="importStats"></div>
+
+            <div class="import-preview-table">
+              <table class="reviews-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Auteur</th>
+                    <th>Note</th>
+                    <th>Avis</th>
+                    <th>Image</th>
+                    <th>Pays</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="importPreviewBody"></tbody>
+              </table>
+            </div>
+
+            <div class="import-actions">
+              <button class="import-btn import-btn--primary" id="importDownloadBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Télécharger reviews.csv
+              </button>
+              <button class="import-btn" id="importResetBtn">
+                Recommencer
+              </button>
+            </div>
+
+            <div class="import-next-steps">
+              <h4>Étapes suivantes</h4>
+              <ol>
+                <li>Remplacez le fichier <code>data/reviews.csv</code> dans votre repo par le fichier téléchargé</li>
+                <li><code>git add . && git commit -m "import avis" && git push</code></li>
+                <li>Vercel redéploie automatiquement (~30s) ✅</li>
+              </ol>
+            </div>
           </div>
         </div>
       </div>

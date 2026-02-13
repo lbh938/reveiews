@@ -1,0 +1,11 @@
+review_id,product_handle,product_id,author,email,rating,title,body,image_url,video_url,verified,date,country
+1,serum-vitamine-c,1001,Sophie L.,sophie@example.com,5,Incroyable !,Ma peau n'a jamais été aussi lumineuse. Résultat visible dès la 1ère semaine.,https://cdn.shopify.com/s/files/placeholder_400x400.jpg,,true,2026-01-15,FR
+2,serum-vitamine-c,1001,Marc D.,marc@example.com,4,Très bon produit,Texture agréable et absorption rapide. Je recommande.,https://cdn.shopify.com/s/files/placeholder_400x400.jpg,,true,2026-01-18,FR
+3,creme-hydratante,1002,Julie R.,julie@example.com,5,Coup de cœur,Hydratation longue durée et parfum discret. Parfait !,https://cdn.shopify.com/s/files/placeholder_400x400.jpg,,true,2026-01-20,BE
+4,creme-hydratante,1002,Thomas B.,thomas@example.com,3,Correct sans plus,Bonne crème mais un peu grasse pour ma peau mixte.,,https://example.com/video1.mp4,true,2026-01-22,FR
+5,huile-argan,1003,Amina K.,amina@example.com,5,Top qualité,Huile pure et naturelle. Mes cheveux adorent.,https://cdn.shopify.com/s/files/placeholder_400x400.jpg,,true,2026-01-25,MA
+6,huile-argan,1003,Pierre M.,pierre@example.com,4,Satisfait,Bon rapport qualité/prix. Livraison rapide.,,, true,2026-02-01,FR
+7,serum-vitamine-c,1001,Léa F.,lea@example.com,5,Effet visible,Teint plus uniforme après 2 semaines. J'adore !,https://cdn.shopify.com/s/files/placeholder_400x400.jpg,,true,2026-02-03,CH
+8,masque-argile,1004,Camille H.,camille@example.com,4,Purifiant,Nettoie en profondeur sans dessécher. Très bien.,https://cdn.shopify.com/s/files/placeholder_400x400.jpg,,true,2026-02-05,FR
+9,masque-argile,1004,Nadia S.,nadia@example.com,5,Miracle !,Mon acné a diminué de moitié en un mois. Merci !,https://cdn.shopify.com/s/files/placeholder_400x400.jpg,https://example.com/video2.mp4,true,2026-02-07,FR
+10,creme-hydratante,1002,Antoine V.,antoine@example.com,4,Bonne texture,S'absorbe rapidement. Pas de film gras. Bien.,,, true,2026-02-10,FR

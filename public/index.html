@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Engine — Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⭐</text></svg>">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Swiper pour la preview -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+</head>
+<body>
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__brand">
+      <span class="sidebar__logo">⭐</span>
+      <div>
+        <div class="sidebar__title">Review Engine</div>
+        <div class="sidebar__version">v1.0 — Headless</div>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <a href="#" class="sidebar__link active" data-page="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="sidebar__link" data-page="reviews">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Tous les avis
+      </a>
+      <a href="#" class="sidebar__link" data-page="preview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Aperçu Swiper
+      </a>
+      <a href="#" class="sidebar__link" data-page="api">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Documentation API
+      </a>
+    </nav>
+
+    <div class="sidebar__footer">
+      <div class="sidebar__status" id="apiStatus">
+        <span class="status-dot"></span> Connexion API…
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════ MOBILE HEADER ═══════════ -->
+  <header class="mobile-header">
+    <button class="mobile-header__toggle" id="menuToggle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="mobile-header__brand">⭐ Review Engine</span>
+  </header>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main" id="main">
+
+    <!-- ─── PAGE: DASHBOARD ─── -->
+    <section class="page active" id="page-dashboard">
+      <div class="page__header">
+        <h1 class="page__title">Dashboard</h1>
+        <p class="page__desc">Vue d'ensemble de vos avis clients</p>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi-card">
+          <div class="kpi-card__icon" style="--kpi-color: #667eea;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="kpi-card__data">
+            <div class="kpi-card__value" id="kpiTotal">—</div>
+            <div class="kpi-card__label">Avis total</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__icon" style="--kpi-color: #f5a623;">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="kpi-card__data">
+            <div class="kpi-card__value" id="kpiAvg">—</div>
+            <div class="kpi-card__label">Note moyenne</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__icon" style="--kpi-color: #27ae60;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="kpi-card__data">
+            <div class="kpi-card__value" id="kpiVerified">—</div>
+            <div class="kpi-card__label">Vérifiés</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__icon" style="--kpi-color: #e74c3c;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <div class="kpi-card__data">
+            <div class="kpi-card__value" id="kpiMedia">—</div>
+            <div class="kpi-card__label">Avec médias</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-grid">
+        <!-- Rating Distribution -->
+        <div class="chart-card">
+          <h3 class="chart-card__title">Distribution des notes</h3>
+          <div class="rating-bars" id="ratingBars"></div>
+        </div>
+        <!-- By Product -->
+        <div class="chart-card">
+          <h3 class="chart-card__title">Par produit</h3>
+          <div class="product-list" id="productList"></div>
+        </div>
+        <!-- By Country -->
+        <div class="chart-card">
+          <h3 class="chart-card__title">Par pays</h3>
+          <div class="country-list" id="countryList"></div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="chart-card chart-card--full">
+        <h3 class="chart-card__title">Timeline des avis</h3>
+        <div class="timeline-chart" id="timelineChart"></div>
+      </div>
+    </section>
+
+    <!-- ─── PAGE: REVIEWS LIST ─── -->
+    <section class="page" id="page-reviews">
+      <div class="page__header">
+        <h1 class="page__title">Tous les avis</h1>
+        <p class="page__desc">Consultez et filtrez tous vos avis clients</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="filters-bar__search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Rechercher un auteur, titre, texte…">
+        </div>
+        <select id="filterProduct" class="filters-bar__select">
+          <option value="">Tous les produits</option>
+        </select>
+        <select id="filterRating" class="filters-bar__select">
+          <option value="">Toutes les notes</option>
+          <option value="5">★★★★★ (5)</option>
+          <option value="4">★★★★☆ (4+)</option>
+          <option value="3">★★★☆☆ (3+)</option>
+          <option value="2">★★☆☆☆ (2+)</option>
+          <option value="1">★☆☆☆☆ (1+)</option>
+        </select>
+        <div class="filters-bar__count" id="reviewsCount">0 avis</div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table class="reviews-table">
+          <thead>
+            <tr>
+              <th>Auteur</th>
+              <th>Produit</th>
+              <th>Note</th>
+              <th>Titre</th>
+              <th>Avis</th>
+              <th>Média</th>
+              <th>Date</th>
+              <th>Pays</th>
+            </tr>
+          </thead>
+          <tbody id="reviewsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── PAGE: PREVIEW SWIPER ─── -->
+    <section class="page" id="page-preview">
+      <div class="page__header">
+        <h1 class="page__title">Aperçu Swiper</h1>
+        <p class="page__desc">Prévisualisation du rendu sur votre boutique Shopify</p>
+      </div>
+
+      <div class="preview-modes">
+        <button class="preview-mode active" data-mode="light">☀️ Clair</button>
+        <button class="preview-mode" data-mode="dark">🌙 Sombre</button>
+        <button class="preview-mode" data-mode="glass">🪟 Glass</button>
+      </div>
+
+      <div class="preview-container" id="previewContainer">
+        <div class="preview-frame" id="previewFrame">
+          <div class="swiper preview-swiper">
+            <div class="swiper-wrapper" id="previewSlides"></div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── PAGE: API DOCS ─── -->
+    <section class="page" id="page-api">
+      <div class="page__header">
+        <h1 class="page__title">Documentation API</h1>
+        <p class="page__desc">Référence complète pour connecter Shopify à votre API</p>
+      </div>
+
+      <div class="api-docs">
+        <!-- Endpoint 1 -->
+        <div class="api-card">
+          <div class="api-card__method">GET</div>
+          <div class="api-card__content">
+            <h3 class="api-card__endpoint">/api</h3>
+            <p class="api-card__desc">Retourne la liste des avis avec filtrage, tri et pagination.</p>
+
+            <h4>Paramètres query</h4>
+            <table class="api-table">
+              <thead><tr><th>Paramètre</th><th>Type</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>product</code></td><td>string</td><td>Filtre par <code>product_handle</code> ou <code>product_id</code></td></tr>
+                <tr><td><code>rating</code></td><td>number</td><td>Note minimum (1-5)</td></tr>
+                <tr><td><code>search</code></td><td>string</td><td>Recherche texte (auteur, titre, corps)</td></tr>
+                <tr><td><code>sort</code></td><td>string</td><td>Champ de tri : <code>date</code>, <code>rating</code>, <code>author</code></td></tr>
+                <tr><td><code>order</code></td><td>string</td><td><code>asc</code> ou <code>desc</code> (défaut)</td></tr>
+                <tr><td><code>limit</code></td><td>number</td><td>Nombre max de résultats</td></tr>
+                <tr><td><code>offset</code></td><td>number</td><td>Décalage pour pagination</td></tr>
+              </tbody>
+            </table>
+
+            <h4>Exemple</h4>
+            <div class="api-example">
+              <code id="apiExampleUrl">/api?product=serum-vitamine-c&rating=4&limit=10</code>
+              <button class="btn-copy" onclick="copyApiUrl(this)">Copier</button>
+            </div>
+
+            <h4>Réponse</h4>
+            <pre class="api-response"><code>{
+  "total": 3,
+  "total_all": 10,
+  "average_rating": 4.4,
+  "offset": 0,
+  "limit": 3,
+  "reviews": [
+    {
+      "review_id": "1",
+      "product_handle": "serum-vitamine-c",
+      "author": "Sophie L.",
+      "rating": "5",
+      "title": "Incroyable !",
+      "body": "Ma peau n'a jamais été aussi lumineuse.",
+      "image_url": "https://...",
+      "verified": "true",
+      "date": "2026-01-15",
+      "country": "FR"
+    }
+  ]
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Endpoint 2 -->
+        <div class="api-card">
+          <div class="api-card__method api-card__method--blue">GET</div>
+          <div class="api-card__content">
+            <h3 class="api-card__endpoint">/api/stats</h3>
+            <p class="api-card__desc">Retourne les statistiques globales des avis.</p>
+
+            <h4>Réponse</h4>
+            <pre class="api-response"><code>{
+  "total": 10,
+  "average_rating": 4.4,
+  "rating_distribution": { "1": 0, "2": 0, "3": 1, "4": 4, "5": 5 },
+  "by_product": {
+    "serum-vitamine-c": { "count": 3, "avg_rating": 4.7 }
+  },
+  "by_country": { "FR": 6, "BE": 1, "MA": 1, "CH": 1 },
+  "with_images": 6,
+  "with_videos": 2,
+  "verified": 10,
+  "timeline": { "2026-01": 5, "2026-02": 5 }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Integration Guide -->
+        <div class="api-card">
+          <div class="api-card__method api-card__method--green">GUIDE</div>
+          <div class="api-card__content">
+            <h3 class="api-card__endpoint">Intégration Shopify</h3>
+            <p class="api-card__desc">Comment connecter cette API à votre section Liquid.</p>
+            <ol class="api-steps">
+              <li>Copiez le fichier <code>section-premium-reviews.liquid</code> dans <code>sections/</code> de votre thème Shopify.</li>
+              <li>Dans le Customizer, ajoutez la section <strong>"✨ Premium Reviews"</strong>.</li>
+              <li>Collez l'URL de votre API dans le champ <strong>"URL de l'API Vercel"</strong> :
+                <div class="api-example" style="margin-top:8px;">
+                  <code id="yourApiUrl">Chargement…</code>
+                  <button class="btn-copy" onclick="copyApiUrl(this)">Copier</button>
+                </div>
+              </li>
+              <li>Configurez les options visuelles (Glassmorphism, couleurs, Swiper…).</li>
+              <li>Publiez ! Les avis apparaîtront automatiquement. ✅</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- CSV Format -->
+        <div class="api-card">
+          <div class="api-card__method api-card__method--orange">CSV</div>
+          <div class="api-card__content">
+            <h3 class="api-card__endpoint">Format du fichier CSV</h3>
+            <p class="api-card__desc">Structure des colonnes dans <code>data/reviews.csv</code></p>
+            <pre class="api-response"><code>review_id,product_handle,product_id,author,email,rating,title,body,image_url,video_url,verified,date,country</code></pre>
+            <table class="api-table">
+              <thead><tr><th>Colonne</th><th>Requis</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>review_id</code></td><td>✅</td><td>ID unique de l'avis</td></tr>
+                <tr><td><code>product_handle</code></td><td>✅</td><td>Handle URL du produit Shopify</td></tr>
+                <tr><td><code>product_id</code></td><td>—</td><td>ID numérique du produit</td></tr>
+                <tr><td><code>author</code></td><td>✅</td><td>Nom de l'auteur</td></tr>
+                <tr><td><code>email</code></td><td>—</td><td>Email (non affiché publiquement)</td></tr>
+                <tr><td><code>rating</code></td><td>✅</td><td>Note de 1 à 5</td></tr>
+                <tr><td><code>title</code></td><td>✅</td><td>Titre de l'avis</td></tr>
+                <tr><td><code>body</code></td><td>✅</td><td>Texte de l'avis</td></tr>
+                <tr><td><code>image_url</code></td><td>—</td><td>URL image (400x400 recommandé)</td></tr>
+                <tr><td><code>video_url</code></td><td>—</td><td>URL vidéo (mp4)</td></tr>
+                <tr><td><code>verified</code></td><td>—</td><td><code>true</code> / <code>false</code></td></tr>
+                <tr><td><code>date</code></td><td>✅</td><td>Format YYYY-MM-DD</td></tr>
+                <tr><td><code>country</code></td><td>—</td><td>Code pays (FR, BE, CH…)</td></tr>
+              </tbody>
+            </table>
+
+            <h4 style="margin-top:20px;">Mise à jour des avis</h4>
+            <pre class="api-response"><code>1. Modifiez data/reviews.csv
+2. git add . && git commit -m "maj avis"
+3. git push
+→ Vercel redéploie automatiquement (~30s)</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

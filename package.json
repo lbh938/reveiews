@@ -1,0 +1,16 @@
+{
+  "name": "reviews-engine",
+  "version": "1.0.0",
+  "description": "Review-Engine Headless — Site + API pour avis premium Shopify",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "npx vercel dev",
+    "deploy": "npx vercel --prod"
+  },
+  "dependencies": {
+    "csvtojson": "^2.0.10"
+  }
+}

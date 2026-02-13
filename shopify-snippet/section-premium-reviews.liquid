@@ -240,7 +240,7 @@
     {% endif %}
   }
 
-  /* Image — format naturel du client, pas de crop forcé */
+  /* Image — la carte s'adapte au format naturel de l'image client */
   .rp-{{ sid }} .rp-media {
     position: relative;
     border-radius: {{ s.card_radius | minus: 4 }}px;
@@ -251,12 +251,9 @@
   .rp-{{ sid }} .rp-media video {
     width: 100%;
     height: auto;
-    max-height: 220px;
-    object-fit: contain;
     display: block;
     border-radius: {{ s.card_radius | minus: 4 }}px;
-    background: {% if is_glass %}rgba(0,0,0,0.15){% else %}#f0f0f0{% endif %};
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.4s ease;
   }
   .rp-{{ sid }} .rp-media:hover img,
   .rp-{{ sid }} .rp-media:hover video {
@@ -729,7 +726,6 @@
       }
 
       if (sh.stars)           h.push('<div class="rp-stars">' + this._stars(parseInt(r.rating)) + '</div>');
-      if (sh.title && r.title) h.push('<h3 class="rp-card-title">' + this._esc(r.title) + '</h3>');
       if (sh.body  && r.body) {
         h.push('<p class="rp-body">"' + this._esc(r.body) + '"</p>');
         h.push('<button class="rp-readmore" data-more="En savoir plus" data-less="Voir moins">En savoir plus</button>');
@@ -890,45 +886,47 @@
     }
 
     _initSwiper() {
-      var c = this._cfg, sw = c.swiper, sid = c.sid;
+      var c = this._cfg, sw = c.swiper;
       var self = this;
-      var sel = '.rp-' + sid;
 
-      /* Attendre que le navigateur ait fini le layout
-         (display:block vient d'être posé) */
+      /* Attendre 2 frames pour que le layout soit calculé */
       requestAnimationFrame(function() {
         requestAnimationFrame(function() {
 
-          var swiperEl = self.querySelector('.swiper');
+          /* ⚠️ Références DOM DIRECTES — pas de sélecteur CSS
+             (les IDs de section Shopify contiennent -- et __ qui cassent les sélecteurs) */
+          var swiperEl      = self.querySelector('.swiper');
+          var paginationEl  = self.querySelector('.swiper-pagination');
+          var nextEl        = self.querySelector('.swiper-button-next');
+          var prevEl        = self.querySelector('.swiper-button-prev');
+
           if (!swiperEl) { console.warn('[AvisPremium] .swiper introuvable'); return; }
 
           var slidesCount = self._filtered.length;
-          var desktopPV = sw.desktop || 3;
+          var desktopPV   = sw.desktop || 2;
+          var gap         = sw.gap || 20;
 
           var cfg = {
-            slidesPerView: sw.mobile || 1,
-            spaceBetween:  sw.gap || 16,
-            grabCursor:    true,
-            loop:          !!(sw.loop && slidesCount > desktopPV),
-            effect:        sw.effect || 'slide',
-
-            /* observer + observeParents : Swiper recalcule
-               automatiquement quand le conteneur change de taille */
-            observer:        true,
-            observeParents:  true,
-
-            pagination: {
-              el: sel + ' .swiper-pagination',
-              clickable: true
-            },
-            navigation: {
-              nextEl: sel + ' .swiper-button-next',
-              prevEl: sel + ' .swiper-button-prev'
-            },
-            breakpoints: {}
+            slidesPerView:  sw.mobile || 1,
+            spaceBetween:   gap,
+            grabCursor:     true,
+            loop:           !!(sw.loop && slidesCount > desktopPV),
+            effect:         sw.effect || 'slide',
+            observer:       true,
+            observeParents: true,
+            breakpoints:    {}
           };
-          cfg.breakpoints[600]  = { slidesPerView: sw.tablet  || 2, spaceBetween: sw.gap || 16 };
-          cfg.breakpoints[1000] = { slidesPerView: desktopPV,       spaceBetween: sw.gap || 16 };
+
+          /* Navigation — éléments DOM, pas sélecteurs */
+          if (paginationEl) {
+            cfg.pagination = { el: paginationEl, clickable: true };
+          }
+          if (nextEl && prevEl) {
+            cfg.navigation = { nextEl: nextEl, prevEl: prevEl };
+          }
+
+          cfg.breakpoints[600]  = { slidesPerView: sw.tablet  || 2, spaceBetween: gap };
+          cfg.breakpoints[1000] = { slidesPerView: desktopPV,       spaceBetween: gap };
 
           if (sw.autoplay) {
             cfg.autoplay = { delay: sw.delay || 5000, disableOnInteraction: false, pauseOnMouseEnter: true };
@@ -940,6 +938,7 @@
 
           try {
             self._swiper = new Swiper(swiperEl, cfg);
+            console.log('[AvisPremium] Swiper initialisé ✓', slidesCount, 'slides');
           } catch (e) {
             console.error('[AvisPremium] Swiper init error', e);
           }
@@ -1082,7 +1081,6 @@
       "label": "Disposition",
       "options": [
         { "value": "grid", "label": "Grille (3 colonnes)" },
-        { "value": "slider", "label": "Carrousel (Swiper)" },
         { "value": "masonry", "label": "Masonry (hauteurs mixtes)" },
         { "value": "list", "label": "Liste (pleine largeur)" }
       ],
@@ -1335,12 +1333,6 @@
       "type": "checkbox",
       "id": "show_stars",
       "label": "Étoiles",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_review_title",
-      "label": "Titre de l'avis",
       "default": true
     },
     {

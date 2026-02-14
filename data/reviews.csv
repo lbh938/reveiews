@@ -1,6 +1,6 @@
 review_id,product_handle,product_id,author,email,rating,title,body,image_url,video_url,verified,date,country
 42316286752306868,product,,Martine W.,,4,Très belle découverte ! Le jet est agréable et la filtration,Très belle découverte ! Le jet est agréable et la filtration efficace. Je rachèterais sans hésiter.,,,true,2026-02-13,CH
-39543429363551285,product,,Théo L.,,4,Bon produit.,Bon produit. L'eau est clairement plus agréable. Seul bémol : le filtre s'use un peu vite.,,,true,2026-02-13,FR
+39543429363551285,product,,Théo L.,,4,Bon produit.,Bon produit. L'eau est clairement plus agréable. Il faut juste penser à remplacer le filtre de temps en temps.,,,true,2026-02-13,FR
 93383843068608237,product,,Éric P.,,5,Très belle découverte ! L'eau de ma douche est maintenant be,Très belle découverte ! L'eau de ma douche est maintenant beaucoup plus propre. Qualité professionnelle à petit prix.,,,true,2026-02-12,LU
 49679016125677710,product,,Tatiana M.,,5,"Seit ich diesen Duschkopf benutze, sind meine Haare viel wei","Seit ich diesen Duschkopf benutze, sind meine Haare viel weicher und glänzender. Der Anti-Kalk-Filter macht einen echten Unterschied!",https://ae01.alicdn.com/kf/A360efabdf851482f8b662ea914052ea55.jpg,,true,2026-02-11,DE
 76318329509841008,product,,Denis F.,,4,Pommeau parfait.,Pommeau parfait. La filtration est visible quand on change le filtre. Mes proches en veulent tous un.,,,true,2026-02-11,CH
@@ -20,7 +20,7 @@ review_id,product_handle,product_id,author,email,rating,title,body,image_url,vid
 51220359160099734,product,,Stéphane U.,,4,Produit haut de gamme.,Produit haut de gamme. L'eau de ma douche est maintenant beaucoup plus propre. Un vrai changement !,,,true,2026-01-29,MC
 84525980188139598,product,,Édouard L.,,5,Mon meilleur achat de l'année.,"Mon meilleur achat de l'année. Le résultat est bluffant dès la première utilisation. Je l'utilise depuis 3 mois, toujours aussi efficace.",https://ae01.alicdn.com/kf/Af732f125fb2e4a458fe42acc2f00240bA.jpg,,true,2026-01-28,FR
 58923946367254489,product,,Tatiana W.,,5,Fantastique ! L'eau filtrée fait vraiment la différence au q,Fantastique ! L'eau filtrée fait vraiment la différence au quotidien. Je suis fan.,,,true,2026-01-28,BE
-24748441926142287,product,,Élodie N.,,4,Pas mal du tout.,Pas mal du tout. La différence sur la peau est notable. Seul bémol : le filtre s'use un peu vite.,,,true,2026-01-27,
+24748441926142287,product,,Élodie N.,,4,Pas mal du tout.,Pas mal du tout. La différence sur la peau est notable. Il faut juste penser à remplacer le filtre de temps en temps.,,,true,2026-01-27,
 16412793431343227,product,,Rose L.,,4,Produit au top ! Le jet est puissant et régulier même avec l,Produit au top ! Le jet est puissant et régulier même avec le filtre. Je recommande vivement !,,,true,2026-01-26,FR
 23821136408959517,product,,Marie O.,,4,Assez satisfait.,Assez satisfait. Le jet est agréable. Le design pourrait être plus moderne.,,,true,2026-01-26,FR
 99506885814589167,product,,Julien W.,,5,Das Duschwasser fühlt sich jetzt viel besser an.,Das Duschwasser fühlt sich jetzt viel besser an. Weniger Kalkflecken an den Fliesen. Bin rundum zufrieden.,https://ae01.alicdn.com/kf/S1975641d2b29481dba06441295606400M.jpg,,true,2026-01-25,DE
@@ -33,7 +33,7 @@ review_id,product_handle,product_id,author,email,rating,title,body,image_url,vid
 10031805934179831,product,,Élodie I.,,5,Quel plaisir de prendre sa douche maintenant ! Le filtre ret,Quel plaisir de prendre sa douche maintenant ! Le filtre retient bien les impuretés et le calcaire. Exactement ce qu'il faut pour une eau calcaire.,,,true,2026-01-18,FR
 99539004254345782,product,,Romain B.,,5,Très belle découverte ! L'eau filtrée rend la peau et les ch,Très belle découverte ! L'eau filtrée rend la peau et les cheveux plus sains. Livré rapidement et bien emballé.,,,true,2026-01-18,CH
 33369039115772056,product,,Charles W.,,4,Globalement bien.,Globalement bien. Le résultat est satisfaisant. Le plastique pourrait être plus robuste.,,,true,2026-01-18,FR
-07655606980458055,product,,Jeanne B.,,4,Pas mal du tout.,Pas mal du tout. Le jet est puissant. Seul bémol : le filtre s'use un peu vite.,,,true,2026-01-16,CH
+07655606980458055,product,,Jeanne B.,,4,Pas mal du tout.,Pas mal du tout. Le jet est puissant. Il faut juste penser à remplacer le filtre de temps en temps.,,,true,2026-01-16,CH
 46600410053202806,product,,Lucie R.,,4,Bon pommeau de douche.,Bon pommeau de douche. La pression est bonne et le filtre semble efficace. Le pommeau est un peu lourd.,,,true,2026-01-13,CH
 10146330680258266,product,,Martine B.,,4,Nickel.,Nickel.,,,true,2026-01-12,FR
 58224945022723768,product,,Pauline B.,,4,Au top.,Au top.,,,true,2026-01-12,
@@ -52,7 +52,7 @@ review_id,product_handle,product_id,author,email,rating,title,body,image_url,vid
 14959020329606082,product,,David L.,,4,Satisfaisant.,Satisfaisant. L'eau est clairement plus agréable. Un peu volumineux.,,,true,2025-12-30,CH
 60925614710210691,product,,Fabien F.,,5,Pommeau parfait.,Pommeau parfait. La filtration est efficace contre le calcaire et les microplastiques. Je le conseille à tous.,,,true,2025-12-29,CH
 23215076265889304,product,,Camille M.,,5,Un vrai bonheur sous la douche.,Un vrai bonheur sous la douche. Plus de rougeurs ni de démangeaisons depuis l'installation. Un vrai plus pour la santé.,,,true,2025-12-27,CH
-82889394329965436,product,,Renée S.,,4,Produit conforme.,Produit conforme. La filtration fonctionne. Seul bémol : le filtre s'use un peu vite.,https://ae01.alicdn.com/kf/Sd31ade5340fb4644a15e09b4f4b80044J.jpg,,true,2025-12-26,BE
+82889394329965436,product,,Renée S.,,4,Produit conforme.,Produit conforme. La filtration fonctionne. Il faut juste penser à remplacer le filtre de temps en temps.,https://ae01.alicdn.com/kf/Sd31ade5340fb4644a15e09b4f4b80044J.jpg,,true,2025-12-26,BE
 41780837731645941,product,,Quentin G.,,4,Produit conforme.,Produit conforme. Le filtre retient bien le calcaire. Un peu bruyant par moments.,,,true,2025-12-26,FR
 66299474964626507,product,,Thérèse R.,,4,Très agréablement surpris.,Très agréablement surpris. L'eau filtrée rend la peau et les cheveux plus sains. Un achat que je ne regrette absolument pas.,,,true,2025-12-25,MC
 28375456320489243,product,,Julien B.,,4,Génial.,Génial.,,,true,2025-12-25,
@@ -88,7 +88,7 @@ review_id,product_handle,product_id,author,email,rating,title,body,image_url,vid
 34956023268041476,product,,Dorothée F.,,5,Exactement ce qu'il me fallait.,"Exactement ce qu'il me fallait. Mes cheveux sont plus brillants et ma peau moins irritée. Très content, bravo.",,,true,2025-12-05,LU
 78243704774714543,product,,Enzo W.,,5,Très satisfait de ce pommeau filtrant.,Très satisfait de ce pommeau filtrant. Le calcaire ne s'accumule plus sur les parois. Livré rapidement et bien emballé.,,,true,2025-12-05,LU
 48530754702782674,product,,Denis F.,,4,Bon pommeau de douche.,Bon pommeau de douche. La filtration est correcte. J'enlève une étoile pour le plastique un peu léger.,,,true,2025-12-04,FR
-18194221272714547,product,,Julien G.,,4,Beau produit.,Beau produit. Le jet est agréable. Seul bémol : le filtre s'use un peu vite.,,,true,2025-12-02,FR
+18194221272714547,product,,Julien G.,,4,Beau produit.,Beau produit. Le jet est agréable. Il faut juste penser à remplacer le filtre de temps en temps.,,,true,2025-12-02,FR
 65910053322292849,product,,Catherine G.,,4,Achat 100% réussi.,Achat 100% réussi. L'eau filtrée fait vraiment la différence au quotidien. Un vrai plus pour la santé.,,,true,2025-12-01,MC
 90923595622750515,product,,Enzo S.,,4,Plutôt content de cet achat.,Plutôt content de cet achat. La filtration fonctionne. Les instructions pourraient être plus claires.,,,true,2025-12-01,
 06085344615125108,product,,Marion F.,,5,Produit au top ! Le système de filtration est performant et ,Produit au top ! Le système de filtration est performant et facile à entretenir. Rien à redire.,,,true,2025-11-29,LU
@@ -110,7 +110,7 @@ review_id,product_handle,product_id,author,email,rating,title,body,image_url,vid
 52840073959067435,product,,Caroline D.,,5,Je ne peux plus m'en passer.,Je ne peux plus m'en passer. La filtration est efficace contre le calcaire et les microplastiques. Un achat que je ne regrette absolument pas.,,,true,2025-11-17,BE
 93056287766056489,product,,Florence C.,,4,Achat 100% réussi.,Achat 100% réussi. Le jet est puissant malgré la filtration. Je l'ai recommandé à toute ma famille.,,,true,2025-11-15,CH
 40977284005939792,product,,Corentin D.,,5,Vraiment impressionné par ce pommeau.,Vraiment impressionné par ce pommeau. Le résultat est bluffant dès la première utilisation. Merci pour ce produit.,,,true,2025-11-15,CH
-30006681709316253,product,,Émile B.,,4,Satisfaisant.,Satisfaisant. La filtration fonctionne. Seul bémol : le filtre s'use un peu vite.,,,true,2025-11-14,BE
+30006681709316253,product,,Émile B.,,4,Satisfaisant.,Satisfaisant. La filtration fonctionne. Il faut juste penser à remplacer le filtre de temps en temps.,,,true,2025-11-14,BE
 77942293691183249,product,,Laurent F.,,5,"Ich bin begeistert! Das Wasser ist weicher, riecht weniger n","Ich bin begeistert! Das Wasser ist weicher, riecht weniger nach Chlor und meine Haut fühlt sich gepflegt an.",,,true,2025-11-13,DE
 03288531396195494,product,,Élise G.,,4,Quel plaisir de prendre sa douche maintenant ! La pression e,Quel plaisir de prendre sa douche maintenant ! La pression est parfaite et l'eau sort vraiment plus douce. La douche est devenue un vrai plaisir.,https://ae01.alicdn.com/kf/A1389f2257bda41bba3d066063419face0.jpg,,true,2025-11-13,LU
 80138355548532482,product,,Patrice M.,,5,Très satisfait de ce pommeau filtrant.,Très satisfait de ce pommeau filtrant. Le système de filtration est performant et facile à entretenir. Livraison rapide en plus.,,,true,2025-11-12,CH
@@ -362,10 +362,10 @@ review_id,product_handle,product_id,author,email,rating,title,body,image_url,vid
 96427586734993427,product,,Maëlys D.,,4,Incroyable rapport qualité-prix.,Incroyable rapport qualité-prix. L'eau filtrée fait vraiment la différence au quotidien. Je recommande vivement !,,,true,2025-03-31,FR
 12708475590753667,product,,Anouk B.,,5,Très belle découverte ! Le filtre est efficace contre le chl,Très belle découverte ! Le filtre est efficace contre le chlore et le calcaire. Le meilleur investissement pour ma salle de bain.,,,true,2025-03-31,CH
 57948970411820781,product,,Caroline B.,,4,Bonne qualité globale.,Bonne qualité globale. Le jet est puissant. Léger défaut d'emballage à la réception.,,,true,2025-03-30,FR
-23061905546872572,product,,Mehdi W.,,4,Qualité décente.,Qualité décente. L'eau est clairement plus agréable. Seul bémol : le filtre s'use un peu vite.,,,true,2025-03-30,FR
+23061905546872572,product,,Mehdi W.,,4,Qualité décente.,Qualité décente. L'eau est clairement plus agréable. Il faut juste penser à remplacer le filtre de temps en temps.,,,true,2025-03-30,FR
 68713078737444251,product,,Capucine D.,,5,Pratique et efficace.,Pratique et efficace.,,,true,2025-03-30,FR
 79628609739003666,product,,Pascale F.,,4,Produit haut de gamme.,Produit haut de gamme. Le résultat est bluffant dès la première utilisation. On sent la différence dès le premier jour.,,,true,2025-03-29,BE
-03189426945597559,product,,Florian H.,,4,Globalement bien.,Globalement bien. La filtration est correcte. Seul bémol : le filtre s'use un peu vite.,,,true,2025-03-29,FR
+03189426945597559,product,,Florian H.,,4,Globalement bien.,Globalement bien. La filtration est correcte. Il faut juste penser à remplacer le filtre de temps en temps.,,,true,2025-03-29,FR
 61542595829685841,product,,Charles M.,,5,Coup de cœur ! Le système de filtration est performant et fa,Coup de cœur ! Le système de filtration est performant et facile à entretenir. Toute la famille approuve.,,,true,2025-03-28,FR
 94171732976384517,product,,Pascale J.,,5,Achat 100% réussi.,Achat 100% réussi. L'eau est plus douce et les cheveux sont moins cassants. Je recommande vivement !,,,true,2025-03-28,CH
 27772901232631178,product,,Sylvie V.,,4,Produit honnête.,Produit honnête. L'installation est facile. Le pommeau est un peu lourd.,,,true,2025-03-28,BE

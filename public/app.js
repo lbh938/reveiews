@@ -8,6 +8,7 @@
   let allReviews = [];
   let statsData = null;
   let previewSwiper = null;
+  let hasUnsavedChanges = false;
 
   /* ═══════════════ NAVIGATION ═══════════════ */
   const links = document.querySelectorAll('.sidebar__link');
@@ -217,6 +218,7 @@
 
     var html = '';
     reviews.forEach(function (r) {
+      var idx = allReviews.indexOf(r);
       var mediaCell = '';
       if (r.image_url && r.image_url.trim()) {
         mediaCell = '<img class="td-media" src="' + r.image_url.trim() + '" alt="media">';
@@ -230,8 +232,10 @@
         ? '<div class="td-verified">✓ Vérifié</div>'
         : '';
 
+      var rowClass = r._added ? 'row-added' : (r._modified ? 'row-modified' : '');
+
       html +=
-        '<tr>' +
+        '<tr class="' + rowClass + '">' +
         '<td>' +
         '<div class="td-author">' +
         '<div class="td-avatar">' + getInitials(r.author) + '</div>' +
@@ -241,15 +245,30 @@
         '</td>' +
         '<td><span class="td-product">' + escapeHtml(r.product_handle) + '</span></td>' +
         '<td><div class="td-stars">' + renderStars(parseInt(r.rating, 10)) + '</div></td>' +
-        '<td><div class="td-title">' + escapeHtml(r.title) + '</div></td>' +
         '<td><div class="td-body">' + escapeHtml(r.body) + '</div></td>' +
         '<td>' + mediaCell + '</td>' +
-        '<td>' + formatDate(r.date) + '</td>' +
         '<td>' + getFlagEmoji((r.country || '').trim()) + ' ' + escapeHtml((r.country || '').trim()) + '</td>' +
+        '<td>' + formatDate(r.date) + '</td>' +
+        '<td><div class="td-actions">' +
+        '<button class="action-btn action-btn--icon edit-btn" data-idx="' + idx + '" title="Modifier">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+        '</button>' +
+        '<button class="action-btn action-btn--icon delete-btn" data-idx="' + idx + '" title="Supprimer">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+        '</button>' +
+        '</div></td>' +
         '</tr>';
     });
 
     tbody.innerHTML = html;
+
+    // Bind edit / delete buttons
+    tbody.querySelectorAll('.edit-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { openEditModal(parseInt(this.dataset.idx, 10)); });
+    });
+    tbody.querySelectorAll('.delete-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { openDeleteModal(parseInt(this.dataset.idx, 10)); });
+    });
   }
 
   function populateProductFilter(reviews) {
@@ -860,6 +879,217 @@
       activateStep(1);
     });
   }
+
+  /* ═══════════════ CRUD — EDIT / DELETE / ADD ═══════════════ */
+
+  var editModal = document.getElementById('editModal');
+  var deleteModalEl = document.getElementById('deleteModal');
+  var deleteTargetIdx = -1;
+
+  // ── Track unsaved changes ──
+  function markUnsaved() {
+    hasUnsavedChanges = true;
+    var banner = document.getElementById('unsavedBanner');
+    var saveBtn = document.getElementById('saveAllBtn');
+    if (banner) banner.style.display = 'flex';
+    if (saveBtn) saveBtn.style.display = 'inline-flex';
+  }
+
+  // ── Open Edit Modal ──
+  function openEditModal(idx) {
+    var r = allReviews[idx];
+    if (!r) return;
+
+    document.getElementById('modalTitle').textContent = 'Modifier l\'avis';
+    document.getElementById('editIndex').value = idx;
+    document.getElementById('editAuthor').value = r.author || '';
+    document.getElementById('editEmail').value = r.email || '';
+    document.getElementById('editRating').value = r.rating || '5';
+    document.getElementById('editProduct').value = r.product_handle || '';
+    document.getElementById('editCountry').value = (r.country || '').trim();
+    document.getElementById('editDate').value = (r.date || '').slice(0, 10);
+    document.getElementById('editTitle').value = r.title || '';
+    document.getElementById('editBody').value = r.body || '';
+    document.getElementById('editImage').value = r.image_url || '';
+    document.getElementById('editVideo').value = r.video_url || '';
+    document.getElementById('editVerified').value = (r.verified && r.verified.trim() === 'true') ? 'true' : 'false';
+
+    updateImagePreview();
+    editModal.style.display = 'flex';
+  }
+
+  // ── Open Add Modal ──
+  function openAddModal() {
+    document.getElementById('modalTitle').textContent = 'Ajouter un avis';
+    document.getElementById('editIndex').value = '-1';
+    document.getElementById('editAuthor').value = '';
+    document.getElementById('editEmail').value = '';
+    document.getElementById('editRating').value = '5';
+    document.getElementById('editProduct').value = 'product';
+    document.getElementById('editCountry').value = '';
+    document.getElementById('editDate').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('editTitle').value = '';
+    document.getElementById('editBody').value = '';
+    document.getElementById('editImage').value = '';
+    document.getElementById('editVideo').value = '';
+    document.getElementById('editVerified').value = 'true';
+
+    updateImagePreview();
+    editModal.style.display = 'flex';
+  }
+
+  // ── Close modals ──
+  function closeEditModal() { editModal.style.display = 'none'; }
+  function closeDeleteModal() { deleteModalEl.style.display = 'none'; deleteTargetIdx = -1; }
+
+  // ── Image preview ──
+  function updateImagePreview() {
+    var url = document.getElementById('editImage').value.trim();
+    var preview = document.getElementById('editImagePreview');
+    if (url) {
+      preview.innerHTML = '<img src="' + escapeHtml(url) + '" alt="preview" onerror="this.style.display=\'none\'">';
+    } else {
+      preview.innerHTML = '';
+    }
+  }
+
+  // ── Save (edit or add) ──
+  function saveReview() {
+    var idx = parseInt(document.getElementById('editIndex').value, 10);
+    var author = document.getElementById('editAuthor').value.trim();
+    var body = document.getElementById('editBody').value.trim();
+
+    if (!author) { alert('Le nom de l\'auteur est requis.'); return; }
+
+    var data = {
+      review_id: '',
+      product_handle: document.getElementById('editProduct').value.trim() || 'product',
+      product_id: '',
+      author: author,
+      email: document.getElementById('editEmail').value.trim(),
+      rating: document.getElementById('editRating').value,
+      title: document.getElementById('editTitle').value.trim(),
+      body: body,
+      image_url: document.getElementById('editImage').value.trim(),
+      video_url: document.getElementById('editVideo').value.trim(),
+      verified: document.getElementById('editVerified').value,
+      date: document.getElementById('editDate').value || new Date().toISOString().slice(0, 10),
+      country: document.getElementById('editCountry').value.trim()
+    };
+
+    if (idx >= 0 && idx < allReviews.length) {
+      // ── Edit existing ──
+      data.review_id = allReviews[idx].review_id;
+      data.product_id = allReviews[idx].product_id || '';
+      data._modified = true;
+      allReviews[idx] = data;
+    } else {
+      // ── Add new ──
+      var maxId = 0;
+      allReviews.forEach(function(r) {
+        var n = parseInt(r.review_id, 10);
+        if (!isNaN(n) && n > maxId) maxId = n;
+      });
+      data.review_id = String(maxId + 1);
+      data._added = true;
+      allReviews.unshift(data); // Add at the beginning
+    }
+
+    markUnsaved();
+    closeEditModal();
+    filterReviews();
+  }
+
+  // ── Delete ──
+  function openDeleteModal(idx) {
+    var r = allReviews[idx];
+    if (!r) return;
+    deleteTargetIdx = idx;
+    document.getElementById('deleteAuthorName').textContent = r.author || 'inconnu';
+    deleteModalEl.style.display = 'flex';
+  }
+
+  function confirmDelete() {
+    if (deleteTargetIdx >= 0 && deleteTargetIdx < allReviews.length) {
+      allReviews.splice(deleteTargetIdx, 1);
+      markUnsaved();
+      closeDeleteModal();
+      filterReviews();
+    }
+  }
+
+  // ── Download modified CSV ──
+  function downloadModifiedCSV() {
+    if (!allReviews.length) return;
+
+    var header = 'review_id,product_handle,product_id,author,email,rating,title,body,image_url,video_url,verified,date,country';
+    var lines = [header];
+
+    allReviews.forEach(function(r) {
+      lines.push([
+        csvEscape(r.review_id),
+        csvEscape(r.product_handle),
+        csvEscape(r.product_id),
+        csvEscape(r.author),
+        csvEscape(r.email),
+        csvEscape(r.rating),
+        csvEscape(r.title),
+        csvEscape(r.body),
+        csvEscape(r.image_url),
+        csvEscape(r.video_url),
+        csvEscape(r.verified),
+        csvEscape(r.date),
+        csvEscape(r.country)
+      ].join(','));
+    });
+
+    var csv = lines.join('\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'reviews.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // Reset flags
+    allReviews.forEach(function(r) { delete r._modified; delete r._added; });
+    hasUnsavedChanges = false;
+    document.getElementById('unsavedBanner').style.display = 'none';
+    document.getElementById('saveAllBtn').style.display = 'none';
+    filterReviews();
+  }
+
+  // ── Bind modal events ──
+  document.getElementById('modalClose').addEventListener('click', closeEditModal);
+  document.getElementById('modalCancel').addEventListener('click', closeEditModal);
+  document.getElementById('modalSave').addEventListener('click', saveReview);
+  document.getElementById('addReviewBtn').addEventListener('click', openAddModal);
+  document.getElementById('editImage').addEventListener('input', updateImagePreview);
+
+  document.getElementById('deleteModalClose').addEventListener('click', closeDeleteModal);
+  document.getElementById('deleteCancelBtn').addEventListener('click', closeDeleteModal);
+  document.getElementById('deleteConfirmBtn').addEventListener('click', confirmDelete);
+
+  document.getElementById('saveAllBtn').addEventListener('click', downloadModifiedCSV);
+  var saveBtn2 = document.getElementById('saveAllBtn2');
+  if (saveBtn2) saveBtn2.addEventListener('click', downloadModifiedCSV);
+
+  // Close modals on overlay click
+  editModal.addEventListener('click', function(e) {
+    if (e.target === editModal) closeEditModal();
+  });
+  deleteModalEl.addEventListener('click', function(e) {
+    if (e.target === deleteModalEl) closeDeleteModal();
+  });
+
+  // Close modals with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeEditModal();
+      closeDeleteModal();
+    }
+  });
 
   /* ═══════════════ BOOT ═══════════════ */
   async function init() {
